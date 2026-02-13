@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
+import { Providers } from "@/components/providers/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,13 +16,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <body className="min-h-screen bg-slate-50 selection:bg-primary-100 selection:text-primary-900">
-        <Navbar />
-        {children}
-        <footer className="border-t border-slate-200 bg-white py-12">
+        <Providers>
+          <Navbar />
+          {children}
+          <footer className="border-t border-slate-200 bg-white py-12">
             <div className="container mx-auto max-w-7xl px-4 text-center text-sm text-slate-500">
-                © {new Date().getFullYear()} RaffleHub. Built for Transparency.
+              © {new Date().getFullYear()} RaffleHub. Built for Transparency.
             </div>
-        </footer>
+          </footer>
+        </Providers>
       </body>
     </html>
   );

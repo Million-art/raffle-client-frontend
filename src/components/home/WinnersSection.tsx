@@ -12,67 +12,70 @@ const STATIC_WINNERS = [
 
 export const WinnersSection = () => {
     return (
-        <section className="bg-white py-24">
-            <div className="container mx-auto max-w-7xl px-4">
-                <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
+        <section className="w-full bg-slate-950 py-32 relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute bottom-0 left-0 h-[600px] w-[600px] bg-blue-600/5 blur-[120px] pointer-events-none" />
+
+            <div className="container mx-auto max-w-7xl px-4 relative z-10">
+                <div className="grid grid-cols-1 gap-20 lg:grid-cols-2 lg:items-center">
                     <div>
-                        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-success-50 text-success-600">
-                            <Trophy className="h-6 w-6" />
+                        <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                            <Trophy className="h-7 w-7" />
                         </div>
-                        <h2 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                        <h2 className="text-5xl font-black tracking-tight text-white sm:text-6xl leading-[1.05]">
                             Real People. <br />
-                            <span className="text-primary-600">Real Accountability.</span>
+                            <span className="bg-gradient-to-r from-emerald-400 to-primary-400 bg-clip-text text-transparent italic">Verified Fortunes.</span>
                         </h2>
-                        <p className="mt-6 text-lg text-slate-600 leading-relaxed">
-                            We believe in absolute clarity. Every winner is verified, their winnings are distributed via secure escrow, and the hash of every draw is published to the public ledger for manual audit.
+                        <p className="mt-8 text-xl text-slate-400 leading-relaxed font-medium">
+                            Transparency isn't a feature; it's our core architecture. Every winner identity is authenticated, every payout is immediate, and every record is immutable.
                         </p>
-                        
-                        <div className="mt-10 space-y-6">
-                            <div className="flex items-start gap-4">
-                                <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600">
-                                    <ShieldCheck className="h-4 w-4" />
+
+                        <div className="mt-12 space-y-8">
+                            <div className="flex items-start gap-5">
+                                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-500/10 border border-primary-500/20 text-primary-400 shadow-xl shadow-primary-500/5">
+                                    <ShieldCheck className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-slate-900">Cryptographic Proof</h4>
-                                    <p className="text-sm text-slate-500">All draws are powered by provably fair algorithms.</p>
+                                    <h4 className="text-lg font-black text-white tracking-tight">Cryptographic Protocol</h4>
+                                    <p className="mt-1 text-slate-400 font-medium">Powered by verified, provably fair randomness engines.</p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-4">
-                                <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600">
-                                    <Ticket className="h-4 w-4" />
+                            <div className="flex items-start gap-5">
+                                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 shadow-xl shadow-blue-500/5">
+                                    <Ticket className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-slate-900">Instant Escrow Release</h4>
-                                    <p className="text-sm text-slate-500">Winning tickets trigger immediate fund reservation for winners.</p>
+                                    <h4 className="text-lg font-black text-white tracking-tight">Direct Settlement Layer</h4>
+                                    <p className="mt-1 text-slate-400 font-medium">Winning tickets trigger immediate asset reservations for winners.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div className="relative">
-                        <div className="absolute inset-0 rounded-3xl bg-slate-100/50 blur-3xl" />
-                        <div className="relative space-y-4">
+                        <div className="absolute inset-x-[-10%] top-[-10%] bottom-[-10%] rounded-[3rem] bg-primary-600/10 blur-[100px]" />
+                        <div className="relative space-y-5">
                             {STATIC_WINNERS.map((winner, idx) => (
-                                <motion.div 
+                                <motion.div
                                     key={winner.id}
-                                    initial={{ opacity: 0, x: 20 }}
+                                    initial={{ opacity: 0, x: 40 }}
                                     whileInView={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                                    transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
                                     viewport={{ once: true }}
-                                    className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-soft transition-all hover:shadow-medium"
+                                    className="flex items-center justify-between rounded-[2rem] border border-white/5 bg-white/[0.03] p-8 backdrop-blur-md shadow-2xl transition-all hover:bg-white/[0.05] hover:border-white/10 group"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 font-bold text-slate-400">
+                                    <div className="flex items-center gap-5">
+                                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 font-black text-slate-400 group-hover:text-white transition-colors">
                                             {winner.name.charAt(0)}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-slate-900">{winner.name}</p>
-                                            <p className="text-xs text-slate-400 font-medium">{winner.raffle}</p>
+                                            <p className="text-lg font-black text-white tracking-tight">{winner.name}</p>
+                                            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold mt-1 group-hover:text-primary-400 transition-colors uppercase">{winner.raffle}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-black text-primary-600">{winner.amount}</p>
-                                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{winner.date}</p>
+                                        <p className="text-2xl font-black text-emerald-400 tracking-tighter">{winner.amount}</p>
+                                        <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold mt-1.5">{winner.date}</p>
                                     </div>
                                 </motion.div>
                             ))}

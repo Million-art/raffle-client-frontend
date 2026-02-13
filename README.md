@@ -1,5 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Participant features
+
+- **Sign up / Sign in** – Email and password registration and login.
+- **Dashboard** – Authenticated users can view **My dashboard** (`/dashboard`) to see raffles they participated in and their ticket counts.
+
+The frontend talks to the **client-backend** (participant API). Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8081`). Start the client-backend before using login or dashboard.
+
 ## Getting Started
 
 First, run the development server:
