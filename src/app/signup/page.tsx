@@ -27,10 +27,10 @@ function GoogleLoginSection() {
     <>
       <div className="mt-8 relative">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-slate-100"></div>
+          <div className="w-full border-t border-white/10"></div>
         </div>
         <div className="relative flex justify-center text-sm font-medium">
-          <span className="bg-white px-4 text-slate-400">or continue with</span>
+          <span className="bg-slate-900/80 px-4 text-slate-500">or continue with</span>
         </div>
       </div>
 
@@ -93,25 +93,25 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-[85vh] flex-col items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl shadow-slate-200/50">
+    <main className="flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-8 shadow-2xl backdrop-blur-md">
         <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-200">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg">
             <Shield className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
-          <p className="mt-2 text-center text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-white">Create your account</h1>
+          <p className="mt-2 text-center text-sm text-slate-400">
             Join RaffleHub and start participating in exciting raffles
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 flex items-center justify-between rounded-lg bg-red-50 p-4 text-sm text-red-600">
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
             <span>{error}</span>
             <button
               type="button"
               onClick={clearError}
-              className="ml-2 font-semibold underline"
+              className="ml-2 font-semibold text-red-300 hover:text-red-200 underline"
             >
               Dismiss
             </button>
@@ -120,7 +120,7 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="signup-phone" className="mb-1.5 block text-sm font-semibold text-slate-700">
+            <label htmlFor="signup-phone" className="mb-1.5 block text-sm font-semibold text-slate-300">
               Phone Number
             </label>
             <input
@@ -129,13 +129,13 @@ export default function SignupPage() {
               autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               placeholder="+251 9 12 34 56 78"
               required
             />
           </div>
           <div>
-            <label htmlFor="signup-name" className="mb-1.5 block text-sm font-semibold text-slate-700">
+            <label htmlFor="signup-name" className="mb-1.5 block text-sm font-semibold text-slate-300">
               Full Name
             </label>
             <input
@@ -144,13 +144,13 @@ export default function SignupPage() {
               autoComplete="name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               placeholder="Your full name"
               required
             />
           </div>
           <div>
-            <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-slate-700">
+            <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-slate-300">
               Password
             </label>
             <div className="relative">
@@ -160,7 +160,7 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 placeholder="At least 6 characters"
                 required
                 minLength={6}
@@ -168,14 +168,14 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>
           <div>
-            <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-semibold text-slate-700">
+            <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-semibold text-slate-300">
               Confirm Password
             </label>
             <div className="relative">
@@ -185,14 +185,14 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 placeholder="Confirm your password"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
               >
                 {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -201,7 +201,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-2 w-full rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 py-3 text-sm font-bold text-white shadow-lg transition hover:shadow-xl disabled:opacity-60"
+            className="mt-2 w-full rounded-xl bg-white py-3 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-slate-100 disabled:opacity-60"
           >
             {submitting ? "Creating account…" : "Sign up"}
           </button>
@@ -211,9 +211,9 @@ export default function SignupPage() {
           <GoogleLoginSection />
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-primary-600 hover:underline">
+          <Link href="/login" className="font-semibold text-primary-400 hover:text-primary-300">
             Sign in
           </Link>
         </p>

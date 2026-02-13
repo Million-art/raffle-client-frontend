@@ -29,7 +29,7 @@ export function ProductMediaGallery({ raffle, className = "" }: ProductMediaGall
 
   if (items.length === 0) {
     return (
-      <div className={`flex aspect-[16/9] w-full items-center justify-center bg-slate-100 text-slate-400 italic ${className}`}>
+      <div className={`flex aspect-[16/9] w-full items-center justify-center bg-white/5 text-slate-500 italic ${className}`}>
         No product media
       </div>
     );
@@ -64,8 +64,8 @@ export function ProductMediaGallery({ raffle, className = "" }: ProductMediaGall
               onClick={() => setSelectedIndex(i)}
               className={`flex-shrink-0 h-14 w-14 overflow-hidden rounded-lg border-2 transition-all ${
                 selectedIndex === i
-                  ? "border-slate-900 ring-2 ring-primary-300"
-                  : "border-slate-200 hover:border-slate-400"
+                  ? "border-primary-500 ring-2 ring-primary-500/30"
+                  : "border-white/10 hover:border-white/20"
               }`}
             >
               {item.type === "video" ? (
