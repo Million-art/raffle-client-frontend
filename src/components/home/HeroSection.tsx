@@ -68,10 +68,10 @@ export const HeroSection = () => {
                             <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                         </Link>
                         <Link
-                            href="/how-it-works"
+                            href={process.env.NEXT_PUBLIC_AGENT_SIGNUP_URL || "/agent/signup"}
                             className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-10 py-5 text-base font-black text-white backdrop-blur-sm transition-all hover:bg-white/10 active:scale-95"
                         >
-                            Transparency Protocol
+                            Become an Agent
                         </Link>
                     </motion.div>
 
@@ -83,7 +83,7 @@ export const HeroSection = () => {
                         className="mt-24 grid grid-cols-2 gap-8 border-t border-white/5 pt-12 sm:grid-cols-4 lg:gap-20"
                     >
                         <div className="flex flex-col items-center">
-                            <span className="text-4xl font-black text-white tracking-tight">$1.2M+</span>
+                            <span className="text-4xl font-black text-white tracking-tight">1.2M ETB+</span>
                             <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-2 font-bold">Prizes Distributed</span>
                         </div>
                         <div className="flex flex-col items-center">

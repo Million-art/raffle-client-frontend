@@ -9,6 +9,8 @@ interface RaffleUpdate {
     winnerId?: string;
     winnerName?: string;
     executedAt?: string;
+    segments?: string[];
+    winnerSectorIndex?: number;
 }
 
 /**
@@ -19,6 +21,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
     const [status, setStatus] = useState<string | null>(null);
     const [winnerId, setWinnerId] = useState<string | null>(null);
     const [winnerName, setWinnerName] = useState<string | null>(null);
+    const [wheelData, setWheelData] = useState<{ segments: string[]; winnerSectorIndex?: number } | null>(null);
     const [countdown, setCountdown] = useState<number | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
@@ -57,10 +60,13 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
         });
 
         // Listen for draw started
-        const unsubDrawStarted = wsClient.on('draw_started', (data: { raffleId: string }) => {
+        const unsubDrawStarted = wsClient.on('draw_started', (data: { raffleId: string; segments?: string[] }) => {
             if (data.raffleId === raffleId) {
                 setIsDrawing(true);
                 setCountdown(null);
+                if (data.segments?.length) {
+                    setWheelData({ segments: data.segments });
+                }
             }
         });
 
@@ -72,6 +78,9 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
                 if (data.winnerId) setWinnerId(data.winnerId);
                 if (data.winnerName) setWinnerName(data.winnerName);
                 if (data.ticketsSold !== undefined) setTicketsSold(data.ticketsSold);
+                if (data.segments?.length && typeof data.winnerSectorIndex === 'number') {
+                    setWheelData({ segments: data.segments, winnerSectorIndex: data.winnerSectorIndex });
+                }
             }
         });
 
@@ -102,6 +111,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
         setStatus(null);
         setWinnerId(null);
         setWinnerName(null);
+        setWheelData(null);
         setCountdown(null);
         setIsDrawing(false);
     }, []);
@@ -111,6 +121,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
         status,
         winnerId,
         winnerName,
+        wheelData,
         countdown,
         isDrawing,
         isConnected,

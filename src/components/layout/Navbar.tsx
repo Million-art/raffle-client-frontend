@@ -40,15 +40,17 @@ export const Navbar = () => {
             <Users className="h-4 w-4" />
             Explore Raffles
           </Link>
-          <Link
-            href="/winners"
-            className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${
-              pathname?.startsWith("/winners") ? "text-primary-400" : "text-slate-400"
-            }`}
-          >
-            <Trophy className="h-4 w-4" />
-            Winners History
-          </Link>
+          {user && (
+            <Link
+              href="/winners"
+              className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${
+                pathname?.startsWith("/winners") ? "text-primary-400" : "text-slate-400"
+              }`}
+            >
+              <Trophy className="h-4 w-4" />
+              Winners History
+            </Link>
+          )}
           <div className="h-6 w-px bg-white/10" />
 
           {!loading && (

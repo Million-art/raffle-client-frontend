@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Ticket, User, Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { getMyRaffles } from "@/services/participations.service";
 import type { Participation } from "@/services/participations.service";
+import { useRaffleWebSocketMulti } from "@/hooks/useRaffleWebSocketMulti";
 
 function DashboardContent() {
   const [raffles, setRaffles] = useState<Participation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const raffleIds = useMemo(() => (raffles ?? []).map((r) => r.raffleId), [raffles]);
+  const { getState } = useRaffleWebSocketMulti(raffleIds);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +51,7 @@ function DashboardContent() {
     );
   }
 
-  if (raffles.length === 0) {
+  if (!raffles || raffles.length === 0) {
     return (
       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-12 text-center backdrop-blur-md">
         <Ticket className="mx-auto h-14 w-14 text-slate-500" />
@@ -67,14 +71,36 @@ function DashboardContent() {
 
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {raffles.map((r, i) => (
+      {raffles.map((r, i) => {
+        const drawState = getState(r.raffleId);
+        const isInDraw = drawState.countdown !== null || drawState.isDrawing;
+        const sold = drawState.ticketsSold ?? r.ticketsSold;
+        return (
         <motion.article
           key={r.raffleId}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 shadow-xl transition-all hover:border-primary-500/30 hover:shadow-2xl backdrop-blur-md"
+          className="relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 shadow-xl transition-all hover:border-primary-500/30 hover:shadow-2xl backdrop-blur-md"
         >
+          {/* Draw in progress overlay - spinner for all participants in realtime */}
+          {isInDraw && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-md rounded-2xl">
+              <div className="flex flex-col items-center gap-3 p-4">
+                {drawState.countdown !== null ? (
+                  <>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400">Draw starting</p>
+                    <div className="text-4xl font-black tabular-nums text-white">{drawState.countdown}s</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-14 w-14 rounded-full border-4 border-primary-500/30 border-t-primary-400 animate-spin" />
+                    <p className="text-sm font-bold text-white">Picking a winner…</p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
           <div className="relative aspect-video overflow-hidden bg-white/5">
             {r.imageUrl ? (
               <img src={r.imageUrl} alt={r.raffleName} className="h-full w-full object-cover" />
@@ -85,9 +111,9 @@ function DashboardContent() {
             )}
             <div className="absolute left-4 top-4">
               <span className="rounded-full border border-white/10 bg-slate-900/80 backdrop-blur px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
-                {r.status === "locked"
+                {(drawState.status ?? r.status) === "locked"
                   ? "Locked"
-                  : r.status === "executed"
+                  : (drawState.status ?? r.status) === "executed"
                     ? "Completed"
                     : "Active"}
               </span>
@@ -108,13 +134,13 @@ function DashboardContent() {
 
             <div className="mb-6 space-y-2">
               <div className="flex justify-between text-xs font-bold text-slate-300">
-                <span>{r.ticketsSold} sold</span>
+                <span>{sold} sold</span>
                 <span>{r.totalTickets} total</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${(r.ticketsSold / r.totalTickets) * 100}%` }}
+                  animate={{ width: `${(sold / r.totalTickets) * 100}%` }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className="h-full rounded-full bg-primary-600"
                 />
@@ -127,7 +153,8 @@ function DashboardContent() {
             </div>
           </div>
         </motion.article>
-      ))}
+        );
+      })}
     </div>
   );
 }

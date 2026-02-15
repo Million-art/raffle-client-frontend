@@ -8,6 +8,7 @@ import type { RaffleDetail } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
+import { DrawWheelSpinner } from "@/components/raffles/DrawWheelSpinner";
 import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
 
 export default function RaffleDetailPage() {
@@ -26,7 +27,8 @@ export default function RaffleDetailPage() {
     countdown,
     isDrawing,
     winnerId: wsWinnerId,
-    winnerName: wsWinnerName
+    winnerName: wsWinnerName,
+    wheelData,
   } = useRaffleWebSocket(id);
 
   const [joinQuantity, setJoinQuantity] = useState(1);
@@ -191,34 +193,54 @@ export default function RaffleDetailPage() {
               <p className="text-right text-xs font-bold text-primary-600">{Math.round(progress)}% filled</p>
             </div>
 
-            {/* Real-time Draw Overlay */}
-            {(countdown !== null || isDrawing || raffle.status === 'executed') && (
-              <div className="mb-8 rounded-2xl bg-slate-900 p-6 text-white shadow-xl relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
-
-                {countdown !== null && (
-                  <div className="flex flex-col items-center text-center">
+            {/* Full-screen draw overlay - cannot be closed until draw completes */}
+            {(countdown !== null || isDrawing) && (
+              <div
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/98 backdrop-blur-md text-white"
+                aria-modal="true"
+                aria-live="polite"
+                role="dialog"
+              >
+                {countdown !== null && !wheelData?.segments?.length && (
+                  <div className="flex flex-col items-center text-center px-4">
                     <p className="text-primary-400 font-bold uppercase tracking-widest text-xs mb-2">The draw is starting!</p>
-                    <div className="text-5xl font-black mb-2 tabular-nums">{countdown}s</div>
-                    <p className="text-slate-400 text-sm">Waiting for all tickets to clear and participants to join the live view...</p>
+                    <div className="text-6xl font-black mb-2 tabular-nums">{countdown}s</div>
+                    <p className="text-slate-400 text-sm">Waiting for all participants to join the live view...</p>
                   </div>
                 )}
 
-                {isDrawing && (
-                  <div className="flex flex-col items-center text-center">
+                {isDrawing && wheelData?.segments?.length ? (
+                  <div className="px-4">
+                    <DrawWheelSpinner
+                      segments={wheelData.segments}
+                      winnerSectorIndex={wheelData.winnerSectorIndex}
+                      prizeName={raffle.name}
+                    />
+                  </div>
+                ) : isDrawing ? (
+                  <div className="flex flex-col items-center text-center px-4">
                     <div className="mb-4 relative">
                       <div className="h-16 w-16 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-8 w-8 bg-primary-500 rounded-full animate-ping opacity-25" />
-                      </div>
                     </div>
                     <h2 className="text-2xl font-bold mb-1">Picking a winner...</h2>
-                    <p className="text-slate-400 text-sm italic">Expanding tickets and generating secure random result</p>
+                    <p className="text-slate-400 text-sm">Loading participant wheel</p>
                   </div>
-                )}
+                ) : null}
+              </div>
+            )}
 
-                {raffle.status === 'executed' && (raffle.winnerName || raffle.winnerId) && (
+            {/* Executed result - inline */}
+            {raffle.status === 'executed' && (raffle.winnerName || raffle.winnerId || wsWinnerName) && (
+              <div className="mb-8 rounded-2xl bg-slate-900 p-6 text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
+                {wheelData ? (
+                  <DrawWheelSpinner
+                    segments={wheelData.segments}
+                    winnerSectorIndex={wheelData.winnerSectorIndex}
+                    winnerName={wsWinnerName || raffle.winnerName || raffle.winnerId || "Winner"}
+                    prizeName={raffle.name}
+                  />
+                ) : (
                   <div className="flex flex-col items-center text-center space-y-4">
                     <div className="bg-primary-500/20 text-primary-400 p-3 rounded-full mb-2">
                       <User className="h-8 w-8" />

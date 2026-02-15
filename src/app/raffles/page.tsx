@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
 import { getRaffles, purchaseTickets } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRaffleWebSocketMulti } from "@/hooks/useRaffleWebSocketMulti";
 import { Search, Filter, Loader2, X } from "lucide-react";
 
 export default function RafflesPage() {
@@ -22,6 +23,9 @@ export default function RafflesPage() {
   const [joinQuantity, setJoinQuantity] = useState(1);
   const [joinLoading, setJoinLoading] = useState(false);
   const [flash, setFlash] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const raffleIds = useMemo(() => (items ?? []).map((r) => r.id), [items]);
+  const { getState } = useRaffleWebSocketMulti(raffleIds);
 
   const loadRaffles = useCallback(() => {
     setLoading(true);
@@ -152,7 +156,13 @@ export default function RafflesPage() {
           <>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((raffle) => (
-                <RaffleCard key={raffle.id} raffle={raffle} onJoinClick={handleJoinClick} detailHref={`/raffles/${raffle.id}`} />
+                <RaffleCard
+                  key={raffle.id}
+                  raffle={raffle}
+                  onJoinClick={handleJoinClick}
+                  detailHref={`/raffles/${raffle.id}`}
+                  drawState={getState(raffle.id)}
+                />
               ))}
             </div>
 
