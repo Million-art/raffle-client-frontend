@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
 import { getRaffles } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
+import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
 import { Loader2, ArrowRight } from "lucide-react";
 
 export function LiveRafflesSection() {
@@ -11,12 +12,19 @@ export function LiveRafflesSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    getRaffles({ page: 1, limit: 6 })
+  const loadRaffles = useCallback(() => {
+    setLoading(true);
+    getRaffles({ page: 1, limit: 6, liveOnly: true })
       .then((r) => setItems(r.items))
       .catch(() => setError("Could not load raffles"))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadRaffles();
+  }, [loadRaffles]);
+
+  useRaffleListUpdates(loadRaffles);
 
   if (loading) {
     return (

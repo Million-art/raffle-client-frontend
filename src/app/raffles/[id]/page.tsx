@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
 import { DrawWheelSpinner } from "@/components/raffles/DrawWheelSpinner";
+import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
+import { ParticipantsList } from "@/components/raffles/ParticipantsList";
 import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
 
 export default function RaffleDetailPage() {
@@ -194,40 +196,25 @@ export default function RaffleDetailPage() {
             </div>
 
             {/* Full-screen draw overlay - cannot be closed until draw completes */}
-            {(countdown !== null || isDrawing) && (
-              <div
-                className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/98 backdrop-blur-md text-white"
-                aria-modal="true"
-                aria-live="polite"
-                role="dialog"
-              >
-                {countdown !== null && !wheelData?.segments?.length && (
-                  <div className="flex flex-col items-center text-center px-4">
-                    <p className="text-primary-400 font-bold uppercase tracking-widest text-xs mb-2">The draw is starting!</p>
-                    <div className="text-6xl font-black mb-2 tabular-nums">{countdown}s</div>
-                    <p className="text-slate-400 text-sm">Waiting for all participants to join the live view...</p>
-                  </div>
-                )}
-
-                {isDrawing && wheelData?.segments?.length ? (
-                  <div className="px-4">
-                    <DrawWheelSpinner
-                      segments={wheelData.segments}
-                      winnerSectorIndex={wheelData.winnerSectorIndex}
-                      prizeName={raffle.name}
-                    />
-                  </div>
-                ) : isDrawing ? (
-                  <div className="flex flex-col items-center text-center px-4">
-                    <div className="mb-4 relative">
-                      <div className="h-16 w-16 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
-                    </div>
-                    <h2 className="text-2xl font-bold mb-1">Picking a winner...</h2>
-                    <p className="text-slate-400 text-sm">Loading participant wheel</p>
-                  </div>
-                ) : null}
-              </div>
-            )}
+            {/* Gamified Full-Screen Overlay */}
+            <GamifiedDrawOverlay
+              isOpen={countdown !== null || isDrawing || (raffle.status === 'executed' && !!(wsWinnerName || raffle.winnerName))}
+              raffleName={raffle.name}
+              drawState={{
+                countdown,
+                isDrawing,
+                status: wsStatus || raffle.status || null,
+                winnerId: wsWinnerId || raffle.winnerId,
+                winnerName: wsWinnerName || raffle.winnerName,
+                ticketsSold: wsTicketsSold ?? raffle.ticketsSold,
+              }}
+              segments={wheelData?.segments || []}
+              winnerSectorIndex={wheelData?.winnerSectorIndex}
+              onClose={() => {
+                // Optional: refresh data or just close overlay
+                loadRaffle();
+              }}
+            />
 
             {/* Executed result - inline */}
             {raffle.status === 'executed' && (raffle.winnerName || raffle.winnerId || wsWinnerName) && (
@@ -279,6 +266,11 @@ export default function RaffleDetailPage() {
             </div>
           </div>
         </article>
+
+        {/* Participants List */}
+        <div className="mt-8">
+          <ParticipantsList raffleId={id} />
+        </div>
       </div>
 
       {/* Join modal */}

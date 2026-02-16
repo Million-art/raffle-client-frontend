@@ -10,16 +10,22 @@ import { GoogleLogin } from "@react-oauth/google";
 /**
  * Sub-component to handle Google Login logic.
  */
+const NO_ACCOUNT_ERROR = "No account found with this email. Please sign up first.";
+
 function GoogleLoginSection() {
-  const { googleLogin } = useAuth();
+  const { googleLogin, clearError } = useAuth();
   const router = useRouter();
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       await googleLogin(credentialResponse.credential, false);
       router.push("/dashboard");
-    } catch {
-      // error set in context
+    } catch (e) {
+      if (e instanceof Error && e.message === NO_ACCOUNT_ERROR) {
+        clearError();
+        router.push("/signup");
+      }
+      // otherwise error is set in context and shown
     }
   };
 
@@ -43,6 +49,7 @@ function GoogleLoginSection() {
           theme="outline"
           shape="pill"
           width="320"
+          text="signin_with"
         />
       </div>
     </>

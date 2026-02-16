@@ -43,6 +43,7 @@ function GoogleLoginSection() {
           theme="outline"
           shape="pill"
           width="320"
+          text="signup_with"
         />
       </div>
     </>

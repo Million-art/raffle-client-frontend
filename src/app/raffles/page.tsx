@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
+import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { getRaffles, purchaseTickets } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRaffleWebSocketMulti } from "@/hooks/useRaffleWebSocketMulti";
-import { Search, Filter, Loader2, X } from "lucide-react";
+import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
+import { Loader2, X } from "lucide-react";
 
 export default function RafflesPage() {
   const router = useRouter();
@@ -23,9 +25,22 @@ export default function RafflesPage() {
   const [joinQuantity, setJoinQuantity] = useState(1);
   const [joinLoading, setJoinLoading] = useState(false);
   const [flash, setFlash] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [closedDraws, setClosedDraws] = useState<Set<string>>(new Set());
 
   const raffleIds = useMemo(() => (items ?? []).map((r) => r.id), [items]);
   const { getState } = useRaffleWebSocketMulti(raffleIds);
+
+  const { activeDrawRaffle, activeDrawState } = useMemo(() => {
+    const active = items.find((r) => {
+      if (closedDraws.has(r.id)) return false;
+      const s = getState(r.id);
+      return s.countdown !== null || s.isDrawing || (s.winnerName && s.status === 'executed');
+    });
+    return {
+      activeDrawRaffle: active,
+      activeDrawState: active ? getState(active.id) : null
+    };
+  }, [items, getState, closedDraws]);
 
   const loadRaffles = useCallback(() => {
     setLoading(true);
@@ -41,6 +56,8 @@ export default function RafflesPage() {
   useEffect(() => {
     loadRaffles();
   }, [loadRaffles]);
+
+  useRaffleListUpdates(loadRaffles);
 
   const handleJoinClick = useCallback(
     (raffle: RaffleListItem) => {
@@ -83,11 +100,10 @@ export default function RafflesPage() {
       <div className="container relative z-10 mx-auto max-w-7xl px-4">
         {flash && (
           <div
-            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${
-              flash.type === "success"
-                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/20 bg-red-500/10 text-red-400"
-            }`}
+            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${flash.type === "success"
+              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              : "border-red-500/20 bg-red-500/10 text-red-400"
+              }`}
             role="alert"
           >
             {flash.text}
@@ -114,23 +130,6 @@ export default function RafflesPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search by name or agent..."
-                className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-sm font-medium text-white placeholder-slate-500 outline-none transition-all focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20"
-              />
-            </div>
-            <button
-              type="button"
-              className="flex h-12 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 text-sm font-bold text-white transition-all hover:bg-white/10"
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-            </button>
-          </div>
         </div>
 
         {loading ? (
@@ -209,6 +208,7 @@ export default function RafflesPage() {
           aria-modal="true"
           aria-labelledby="join-raffle-title"
         >
+          {/* ... existing modal content ... */}
           <div
             className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-md"
             onClick={(e) => e.stopPropagation()}
@@ -266,6 +266,22 @@ export default function RafflesPage() {
           </div>
         </div>
       )}
+
+      {/* Global Draw Overlay for Raffles List */}
+      <GamifiedDrawOverlay
+        isOpen={!!activeDrawRaffle && !!activeDrawState}
+        raffleName={activeDrawRaffle?.name || ""}
+        drawState={activeDrawState || { countdown: null, isDrawing: false, status: null }}
+        segments={activeDrawState?.segments}
+        winnerSectorIndex={activeDrawState?.winnerSectorIndex}
+        onClose={() => {
+          if (activeDrawRaffle) {
+            setClosedDraws((prev) => new Set(prev).add(activeDrawRaffle.id));
+            loadRaffles(); // Refresh list to update status
+          }
+        }}
+      />
+
     </main>
   );
 }

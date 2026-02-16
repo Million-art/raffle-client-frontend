@@ -8,6 +8,8 @@ export interface RaffleDrawState {
   ticketsSold?: number;
   winnerId?: string | null;
   winnerName?: string | null;
+  segments?: string[];
+  winnerSectorIndex?: number;
 }
 
 interface RaffleUpdate {
@@ -41,13 +43,14 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
   }, []);
 
   useEffect(() => {
-    if (!wsClient || raffleIds.length === 0) return;
+    const client = wsClient;
+    if (!client || raffleIds.length === 0) return;
 
-    setIsConnected(wsClient.isConnected());
+    setIsConnected(client.isConnected());
 
-    raffleIds.forEach((id) => wsClient.subscribe(id));
+    raffleIds.forEach((id) => client.subscribe(id));
 
-    const unsubPurchase = wsClient.on('ticket_purchase', (data: RaffleUpdate) => {
+    const unsubPurchase = client.on('ticket_purchase', (data: RaffleUpdate) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
         updateState(data.raffleId, (prev) => ({
           ...prev,
@@ -57,7 +60,7 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
       }
     });
 
-    const unsubLocked = wsClient.on('raffle_locked', (data: RaffleUpdate) => {
+    const unsubLocked = client.on('raffle_locked', (data: RaffleUpdate) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
         updateState(data.raffleId, (prev) => ({
           ...prev,
@@ -67,7 +70,7 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
       }
     });
 
-    const unsubCountdown = wsClient.on(
+    const unsubCountdown = client.on(
       'raffle_countdown',
       (data: { raffleId: string; countdown: number }) => {
         if (data.raffleId && raffleIds.includes(data.raffleId)) {
@@ -80,17 +83,19 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
       }
     );
 
-    const unsubDrawStarted = wsClient.on('draw_started', (data: { raffleId: string }) => {
+    const unsubDrawStarted = client.on('draw_started', (data: { raffleId: string; segments?: string[] }) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
-        updateState(data.raffleId, () => ({
+        updateState(data.raffleId, (prev) => ({
+          ...prev,
           countdown: null,
           isDrawing: true,
           status: 'locked',
+          segments: data.segments ?? prev.segments,
         }));
       }
     });
 
-    const unsubExecuted = wsClient.on('raffle_executed', (data: RaffleUpdate) => {
+    const unsubExecuted = client.on('raffle_executed', (data: RaffleUpdate & { segments?: string[]; winnerSectorIndex?: number }) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
         updateState(data.raffleId, (prev) => ({
           ...prev,
@@ -100,11 +105,13 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
           ticketsSold: data.ticketsSold ?? prev.ticketsSold,
           winnerId: data.winnerId ?? null,
           winnerName: data.winnerName ?? null,
+          segments: data.segments ?? prev.segments,
+          winnerSectorIndex: data.winnerSectorIndex,
         }));
       }
     });
 
-    const unsubUpdate = wsClient.on('raffle_update', (data: RaffleUpdate) => {
+    const unsubUpdate = client.on('raffle_update', (data: RaffleUpdate) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
         updateState(data.raffleId, (prev) => ({
           ...prev,
@@ -115,7 +122,7 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
     });
 
     return () => {
-      raffleIds.forEach((id) => wsClient?.unsubscribe(id));
+      raffleIds.forEach((id) => client?.unsubscribe(id));
       unsubPurchase();
       unsubLocked();
       unsubCountdown();

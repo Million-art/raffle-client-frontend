@@ -10,6 +10,7 @@ export interface Participation {
   myTickets: number;
   status: string;
   imageUrl?: string;
+  videoUrl?: string;
   agentName?: string;
 }
 

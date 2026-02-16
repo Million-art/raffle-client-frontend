@@ -10,17 +10,9 @@ import {
 } from "@matmachry/react-wheel-of-fortune";
 
 const SEG_COLORS = [
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#22c55e",
-  "#14b8a6",
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-  "#06b6d4",
-  "#84cc16",
-];
+  "#ef4444", "#f97316", "#eab308", "#22c55e", "#14b8a6",
+  "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16",
+] as const;
 
 interface DrawWheelSpinnerProps {
   segments: string[];
@@ -42,7 +34,8 @@ export function DrawWheelSpinner({
   winnerSectorIndex,
   winnerName = "Winner",
   prizeName = "Prize",
-}: DrawWheelSpinnerProps) {
+  className,
+}: DrawWheelSpinnerProps & { className?: string }) {
   const wheelRef = useRef<WheelOfFortuneRef>(null);
   const [phase, setPhase] = useState<"spinning" | "reveal">("spinning");
   const [hasSpun, setHasSpun] = useState(false);
@@ -52,7 +45,7 @@ export function DrawWheelSpinner({
   const prizes: WheelOfFortunePrize[] = segments.map((name, i) => ({
     key: `seg-${i}`,
     prize: name.length > 8 ? name.slice(0, 6) + "…" : name,
-    color: SEG_COLORS[i % SEG_COLORS.length],
+    color: SEG_COLORS[i % SEG_COLORS.length] as `#${string}`,
   }));
 
   const defaultWinnerKey = isLanding ? `seg-${winnerSectorIndex}` : undefined;
@@ -68,7 +61,7 @@ export function DrawWheelSpinner({
   }, [isLanding, hasSpun, segments.length]);
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className={`flex flex-col items-center gap-6 ${className ?? ""}`}>
       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-400">
         {isLanding ? "Spin the wheel" : "Spinning in realtime for all participants…"}
       </p>
@@ -177,15 +170,15 @@ function SimpleSpinningWheel({ segments }: { segments: string[] }) {
                   x={tx}
                   y={ty}
                   fill="white"
-                  fontSize="3.5"
-                  fontWeight="bold"
+                  fontSize="5"
+                  fontWeight="900"
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  className="pointer-events-none select-none"
-                  style={{ textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
+                  className="pointer-events-none select-none uppercase"
+                  style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)", stroke: "rgba(0,0,0,0.5)", strokeWidth: "0.5px", paintOrder: "stroke" }}
                   transform={`rotate(${midAngle}, ${tx}, ${ty})`}
                 >
-                  {name.length > 8 ? name.slice(0, 6) + "…" : name}
+                  {name.length > 10 ? name.slice(0, 8) + ".." : name}
                 </text>
               </g>
             );

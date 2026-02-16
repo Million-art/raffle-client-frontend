@@ -6,6 +6,7 @@ export type WebSocketMessageType =
     | 'raffle_executed'
     | 'raffle_countdown'
     | 'draw_started'
+    | 'raffle_approved'
     | 'subscribe'
     | 'unsubscribe';
 
@@ -33,11 +34,9 @@ class WebSocketClient {
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
-                console.log(`[WebSocket] Connecting to ${this.url}`);
                 this.ws = new WebSocket(this.url);
 
                 this.ws.onopen = () => {
-                    console.log('[WebSocket] Connected');
                     this.reconnectAttempts = 0;
 
                     // Resubscribe to all raffles
@@ -69,7 +68,6 @@ class WebSocketClient {
                 };
 
                 this.ws.onclose = () => {
-                    console.log('[WebSocket] Disconnected');
                     this.handleReconnect();
                 };
             } catch (error) {
@@ -82,7 +80,6 @@ class WebSocketClient {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-            console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
 
             setTimeout(() => {
                 this.connect().catch(console.error);

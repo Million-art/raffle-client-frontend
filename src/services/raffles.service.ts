@@ -58,11 +58,15 @@ interface AdminRafflesResponse {
 export async function getRaffles(options?: {
   page?: number;
   limit?: number;
+  liveOnly?: boolean;
 }): Promise<{ items: RaffleListItem[]; total: number; page: number; limit: number }> {
   const page = options?.page ?? 1;
   const limit = options?.limit ?? 20;
+  const liveOnly = options?.liveOnly ?? false;
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (liveOnly) params.set("live_only", "true");
   const raw = await apiFetch<RafflesListResponse | AdminRafflesResponse>(
-    `/api/raffles?page=${page}&limit=${limit}`
+    `/api/raffles?${params.toString()}`
   );
   // Support both client-backend shape { items, total, ... } and admin shape { data: { items, total, ... } }
   const data =
