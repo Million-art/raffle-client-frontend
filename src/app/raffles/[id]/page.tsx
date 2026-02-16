@@ -267,10 +267,6 @@ export default function RaffleDetailPage() {
           </div>
         </article>
 
-        {/* Participants List */}
-        <div className="mt-8">
-          <ParticipantsList raffleId={id} />
-        </div>
       </div>
 
       {/* Join modal */}

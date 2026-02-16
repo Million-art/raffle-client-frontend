@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Shield, Users, Trophy, LogIn, LayoutDashboard, LogOut, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export const Navbar = () => {
   const { user, loading, logout } = useAuth();
@@ -33,9 +34,8 @@ export const Navbar = () => {
         <div className="hidden md:ml-10 md:flex md:items-center md:gap-8">
           <Link
             href="/raffles"
-            className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${
-              pathname?.startsWith("/raffles") ? "text-primary-400" : "text-slate-400"
-            }`}
+            className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${pathname?.startsWith("/raffles") ? "text-primary-400" : "text-slate-400"
+              }`}
           >
             <Users className="h-4 w-4" />
             Explore Raffles
@@ -43,9 +43,8 @@ export const Navbar = () => {
           {user && (
             <Link
               href="/winners"
-              className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${
-                pathname?.startsWith("/winners") ? "text-primary-400" : "text-slate-400"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${pathname?.startsWith("/winners") ? "text-primary-400" : "text-slate-400"
+                }`}
             >
               <Trophy className="h-4 w-4" />
               Winners History
@@ -57,6 +56,7 @@ export const Navbar = () => {
             <>
               {user ? (
                 <>
+                  <NotificationBell />
                   <div className="relative">
                     <button
                       type="button"
@@ -94,9 +94,8 @@ export const Navbar = () => {
                           </div>
                           <Link
                             href="/dashboard"
-                            className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/5 ${
-                              pathname === "/dashboard" ? "bg-primary-500/20 text-primary-400 font-semibold" : "text-slate-300"
-                            }`}
+                            className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/5 ${pathname === "/dashboard" ? "bg-primary-500/20 text-primary-400 font-semibold" : "text-slate-300"
+                              }`}
                             onClick={() => setMenuOpen(false)}
                           >
                             <LayoutDashboard className="h-4 w-4" />
@@ -137,17 +136,19 @@ export const Navbar = () => {
           )}
         </div>
 
-        <div className="flex md:hidden">
+        <div className="flex items-center gap-2 md:hidden">
           {user && (
-            <Link
-              href="/dashboard"
-              className={`rounded-full p-2 ${
-                pathname === "/dashboard" ? "bg-primary-500/20 text-primary-400" : "bg-white/5 text-slate-400"
-              }`}
-              aria-label="My dashboard"
-            >
-              <LayoutDashboard className="h-5 w-5" />
-            </Link>
+            <>
+              <NotificationBell />
+              <Link
+                href="/dashboard"
+                className={`rounded-full p-2 ${pathname === "/dashboard" ? "bg-primary-500/20 text-primary-400" : "bg-white/5 text-slate-400"
+                  }`}
+                aria-label="My dashboard"
+              >
+                <LayoutDashboard className="h-5 w-5" />
+              </Link>
+            </>
           )}
           {!user && !loading && (
             <div className="flex gap-2">
