@@ -120,8 +120,8 @@ interface RaffleDetailApiRaffle {
   media?: RaffleMediaItem[];
   agent?: { displayName?: string };
   createdAt?: string;
-  winner_id?: string;
-  winner_name?: string;
+  winnerId?: string;
+  winnerName?: string;
 }
 
 interface RaffleDetailResponse {
@@ -148,8 +148,8 @@ function mapDetailResponse(r: RaffleDetailApiRaffle, ticketsSold: number): Raffl
     agentName: r.agent?.displayName,
     status: r.status,
     createdAt: r.createdAt,
-    winnerId: r.winner_id,
-    winnerName: r.winner_name,
+    winnerId: r.winnerId,
+    winnerName: r.winnerName,
   };
 }
 

@@ -32,6 +32,7 @@ class WebSocketClient {
     }
 
     connect(): Promise<void> {
+        console.log('[WebSocket] Connecting to:', this.url);
         return new Promise((resolve, reject) => {
             try {
                 this.ws = new WebSocket(this.url);

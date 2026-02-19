@@ -20,6 +20,8 @@ interface RaffleUpdate {
   winnerId?: string;
   winnerName?: string;
   executedAt?: string;
+  segments?: string[];
+  winnerSectorIndex?: number;
 }
 
 /**
@@ -54,7 +56,7 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
         updateState(data.raffleId, (prev) => ({
           ...prev,
-          ticketsSold: data.ticketsSold,
+          ticketsSold: data.ticketsSold ?? prev.ticketsSold,
           status: data.status ?? prev.status,
         }));
       }
@@ -95,7 +97,7 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
       }
     });
 
-    const unsubExecuted = client.on('raffle_executed', (data: RaffleUpdate & { segments?: string[]; winnerSectorIndex?: number }) => {
+    const unsubExecuted = client.on('raffle_executed', (data: RaffleUpdate) => {
       if (data.raffleId && raffleIds.includes(data.raffleId)) {
         updateState(data.raffleId, (prev) => ({
           ...prev,
@@ -103,10 +105,10 @@ export const useRaffleWebSocketMulti = (raffleIds: string[]) => {
           isDrawing: false,
           status: 'executed',
           ticketsSold: data.ticketsSold ?? prev.ticketsSold,
-          winnerId: data.winnerId ?? null,
-          winnerName: data.winnerName ?? null,
+          winnerId: data.winnerId ?? prev.winnerId,
+          winnerName: data.winnerName ?? prev.winnerName,
           segments: data.segments ?? prev.segments,
-          winnerSectorIndex: data.winnerSectorIndex,
+          winnerSectorIndex: typeof data.winnerSectorIndex === 'number' ? data.winnerSectorIndex : prev.winnerSectorIndex,
         }));
       }
     });

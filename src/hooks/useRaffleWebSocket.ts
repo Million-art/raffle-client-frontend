@@ -37,7 +37,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
 
         // Listen for ticket purchases
         const unsubPurchase = wsClient.on('ticket_purchase', (data: RaffleUpdate) => {
-            if (data.raffleId === raffleId) {
+            if (data.raffleId?.toLowerCase() === raffleId?.toLowerCase()) {
                 if (data.ticketsSold !== undefined) setTicketsSold(data.ticketsSold);
                 if (data.status) setStatus(data.status);
             }
@@ -45,7 +45,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
 
         // Listen for raffle locked
         const unsubLocked = wsClient.on('raffle_locked', (data: RaffleUpdate) => {
-            if (data.raffleId === raffleId) {
+            if (data.raffleId?.toLowerCase() === raffleId?.toLowerCase()) {
                 setStatus('locked');
                 if (data.ticketsSold !== undefined) setTicketsSold(data.ticketsSold);
             }
@@ -53,7 +53,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
 
         // Listen for raffle countdown
         const unsubCountdown = wsClient.on('raffle_countdown', (data: { raffleId: string; countdown: number }) => {
-            if (data.raffleId === raffleId) {
+            if (data.raffleId?.toLowerCase() === raffleId?.toLowerCase()) {
                 setCountdown(data.countdown);
                 setStatus('locked');
             }
@@ -61,7 +61,7 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
 
         // Listen for draw started
         const unsubDrawStarted = wsClient.on('draw_started', (data: { raffleId: string; segments?: string[] }) => {
-            if (data.raffleId === raffleId) {
+            if (data.raffleId?.toLowerCase() === raffleId?.toLowerCase()) {
                 setIsDrawing(true);
                 setCountdown(null);
                 if (data.segments?.length) {
@@ -72,21 +72,27 @@ export const useRaffleWebSocket = (raffleId: string | undefined) => {
 
         // Listen for raffle executed
         const unsubExecuted = wsClient.on('raffle_executed', (data: RaffleUpdate) => {
-            if (data.raffleId === raffleId) {
+            if (data.raffleId?.toLowerCase() === raffleId?.toLowerCase()) {
                 setIsDrawing(false);
                 setStatus('executed');
                 if (data.winnerId) setWinnerId(data.winnerId);
                 if (data.winnerName) setWinnerName(data.winnerName);
                 if (data.ticketsSold !== undefined) setTicketsSold(data.ticketsSold);
-                if (data.segments?.length && typeof data.winnerSectorIndex === 'number') {
-                    setWheelData({ segments: data.segments, winnerSectorIndex: data.winnerSectorIndex });
-                }
+
+                // Update wheel data - merge with existing segments if missing in this event
+                setWheelData(prev => {
+                    const segments = data.segments?.length ? data.segments : prev?.segments;
+                    if (segments && segments.length > 0 && typeof data.winnerSectorIndex === 'number') {
+                        return { segments, winnerSectorIndex: data.winnerSectorIndex };
+                    }
+                    return prev;
+                });
             }
         });
 
         // Listen for general raffle updates
         const unsubUpdate = wsClient.on('raffle_update', (data: RaffleUpdate) => {
-            if (data.raffleId === raffleId) {
+            if (data.raffleId?.toLowerCase() === raffleId?.toLowerCase()) {
                 if (data.ticketsSold !== undefined) setTicketsSold(data.ticketsSold);
                 if (data.status) setStatus(data.status);
             }
