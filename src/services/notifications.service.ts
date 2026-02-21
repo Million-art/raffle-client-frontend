@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 export interface Notification {
     id: string;
@@ -20,12 +20,13 @@ export interface NotificationsResponse {
 }
 
 export async function getNotifications(limit: number = 20, offset: number = 0): Promise<NotificationsResponse> {
-    return await apiFetch<NotificationsResponse>(`/api/notifications?limit=${limit}&offset=${offset}`);
+    const response = await apiFetch<ApiResponse<NotificationsResponse>>(`/api/notifications?limit=${limit}&offset=${offset}`);
+    return response.data;
 }
 
 export async function getUnreadCount(): Promise<number> {
-    const data = await apiFetch<{ count: number }>('/api/notifications/unread/count');
-    return data.count;
+    const response = await apiFetch<ApiResponse<{ count: number }>>('/api/notifications/unread/count');
+    return response.data.count;
 }
 
 export async function markAsRead(notificationId: string): Promise<void> {

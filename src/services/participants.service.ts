@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 export interface Participant {
     id: string;
@@ -19,8 +19,8 @@ export async function getRaffleParticipants(
     page: number = 1,
     limit: number = 20
 ): Promise<ParticipantsResponse> {
-    const data = await apiFetch<ParticipantsResponse>(
+    const response = await apiFetch<ApiResponse<ParticipantsResponse>>(
         `/api/raffles/${raffleId}/participants?page=${page}&limit=${limit}`
     );
-    return data;
+    return response.data;
 }

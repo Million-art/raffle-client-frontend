@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, X, Users, Sparkles } from "lucide-react";
-import { DrawWheelSpinner } from "./DrawWheelSpinner";
+import { Trophy, X } from "lucide-react";
+import { DrawContainerReveal } from "./DrawContainerReveal";
+import { useDrawSounds } from "@/hooks/useDrawSounds";
 import type { RaffleDrawState } from "@/hooks/useRaffleWebSocketMulti";
-
-// If Portal doesn't exist, we can render directly or create one. 
-// For now, I'll use a simple approach using fixed positioning which works well at top level.
 
 interface GamifiedDrawOverlayProps {
     isOpen: boolean;
@@ -27,25 +25,44 @@ export function GamifiedDrawOverlay({
     onClose,
 }: GamifiedDrawOverlayProps) {
     const [showConfetti, setShowConfetti] = useState(false);
+    const [isStuck, setIsStuck] = useState(false);
+    const sounds = useDrawSounds();
+
+    const handleClose = useCallback(() => {
+        sounds.stopShake();
+        onClose();
+    }, [sounds, onClose]);
 
     // Reset internal state when closed
     useEffect(() => {
         if (!isOpen) {
             setShowConfetti(false);
+            setIsStuck(false);
         }
     }, [isOpen]);
 
+    // Detect stuck draw: if isDrawing for 25s with no winner, allow user to close
+    const hasWinner = !!drawState.winnerName;
+    useEffect(() => {
+        if (!drawState.isDrawing || hasWinner) {
+            setIsStuck(false);
+            return;
+        }
+        const t = setTimeout(() => setIsStuck(true), 25000);
+        return () => clearTimeout(t);
+    }, [drawState.isDrawing, hasWinner]);
+
     // Trigger confetti when winner is revealed
     useEffect(() => {
-        if (drawState.winnerName || drawState.winnerId) {
+        if (drawState.winnerName) {
             setShowConfetti(true);
         }
-    }, [drawState.winnerName, drawState.winnerId]);
+    }, [drawState.winnerName]);
 
     if (!isOpen) return null;
 
-    const { countdown, isDrawing, winnerName, winnerId } = drawState;
-    const isWinnerRevealed = !!(winnerName || winnerId);
+    const { countdown, isDrawing, winnerName } = drawState;
+    const isWinnerRevealed = !!winnerName;
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-950/95 backdrop-blur-xl">
@@ -107,19 +124,23 @@ export function GamifiedDrawOverlay({
                             <h1 className="text-4xl font-black text-white tracking-tight">
                                 {isWinnerRevealed ? "WINNER CONFIRMED" : "DRAW IN PROGRESS"}
                             </h1>
+                            {isWinnerRevealed && winnerName && (
+                                <p className="mt-3 text-2xl font-bold text-amber-400">{winnerName}</p>
+                            )}
                         </div>
 
-                        {/* The Wheel */}
+                        {/* The Shaking Container */}
                         <div className={`transition-all duration-700 ${isWinnerRevealed ? "scale-90 opacity-100" : "scale-110"}`}>
-                            <DrawWheelSpinner
+                            <DrawContainerReveal
                                 segments={segments}
                                 winnerSectorIndex={winnerSectorIndex}
-                                winnerName={winnerName || "Winner"}
+                                winnerName={winnerName ?? undefined}
                                 prizeName={raffleName}
+                                sounds={sounds}
                             />
                         </div>
 
-                        {/* Winner Celebration Overlay (if we want extra pop outside the wheel component) */}
+                        {/* Winner Celebration Overlay */}
                         {isWinnerRevealed && (
                             <motion.div
                                 initial={{ opacity: 0, y: 50 }}
@@ -128,7 +149,7 @@ export function GamifiedDrawOverlay({
                                 className="mt-12 flex flex-col items-center"
                             >
                                 <button
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                     className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-white px-8 py-3 text-sm font-black text-slate-950 transition-transform hover:scale-105 active:scale-95"
                                 >
                                     <span className="relative z-10">CLOSE RESULT</span>
@@ -141,19 +162,33 @@ export function GamifiedDrawOverlay({
                         {/* Improved Security Visualization */}
                         {isDrawing && !isWinnerRevealed && (
                             <div className="mt-12 flex flex-col items-center gap-4 w-full max-w-md">
-                                <div className="flex items-center gap-3 rounded-full bg-slate-900/50 px-6 py-2 border border-emerald-500/30 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500/20 border-t-emerald-400" />
-                                    <span className="text-sm font-bold text-emerald-400 tracking-wide uppercase">Verifying Cryptographic Proof</span>
-                                </div>
-
-                                <div className="font-mono text-xs text-slate-500 bg-black/40 px-4 py-2 rounded-lg border border-white/5 w-full text-center overflow-hidden whitespace-nowrap">
-                                    <HashAnimation />
-                                </div>
-
-                                <div className="flex items-center gap-2 opacity-50">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] uppercase tracking-widest text-slate-400">RaffleHub Secure RNG System</span>
-                                </div>
+                                {isStuck ? (
+                                    <div className="flex flex-col items-center gap-4">
+                                        <p className="text-sm text-amber-400 text-center">
+                                            Draw is taking longer than expected. You can close and refresh the page to check the result.
+                                        </p>
+                                        <button
+                                            onClick={handleClose}
+                                            className="rounded-full bg-white px-6 py-2.5 text-sm font-bold text-slate-950 hover:bg-slate-100 transition-colors"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center gap-3 rounded-full bg-slate-900/50 px-6 py-2 border border-emerald-500/30 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500/20 border-t-emerald-400" />
+                                            <span className="text-sm font-bold text-emerald-400 tracking-wide uppercase">Verifying Cryptographic Proof</span>
+                                        </div>
+                                        <div className="font-mono text-xs text-slate-500 bg-black/40 px-4 py-2 rounded-lg border border-white/5 w-full text-center overflow-hidden whitespace-nowrap">
+                                            <HashAnimation />
+                                        </div>
+                                        <div className="flex items-center gap-2 opacity-50">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-[10px] uppercase tracking-widest text-slate-400">RaffleHub Secure RNG System</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
                     </motion.div>

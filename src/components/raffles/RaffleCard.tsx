@@ -4,7 +4,6 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { User, ArrowRight, Film } from 'lucide-react';
-import type { RaffleDrawState } from '@/hooks/useRaffleWebSocketMulti';
 
 interface RaffleCardProps {
     raffle: {
@@ -22,17 +21,14 @@ interface RaffleCardProps {
     onJoinClick?: (raffle: RaffleCardProps["raffle"]) => void;
     /** If set, card links to this detail page (e.g. /raffles/[id]) */
     detailHref?: string;
-    /** Real-time draw state (countdown, spinner) - when provided, shows overlay during draw */
-    drawState?: RaffleDrawState;
 }
 
-export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, detailHref, drawState }) => {
+export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, detailHref }) => {
     const router = useRouter();
-    const sold = drawState?.ticketsSold ?? raffle.ticketsSold;
+    const sold = raffle.ticketsSold;
     const progress = raffle.totalTickets > 0
         ? (sold / raffle.totalTickets) * 100
         : 0;
-    const isInDraw = drawState && (drawState.countdown !== null || drawState.isDrawing);
 
     const handleCardClick = () => {
         if (detailHref) router.push(detailHref);
@@ -54,24 +50,6 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
             role={detailHref ? 'button' : undefined}
             tabIndex={detailHref ? 0 : undefined}
         >
-            {/* Draw in progress overlay - spinner for all participants in realtime */}
-            {isInDraw && (
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm rounded-3xl">
-                    <div className="flex flex-col items-center gap-3 p-4">
-                        {drawState!.countdown !== null ? (
-                            <>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400">Draw starting</p>
-                                <div className="text-4xl font-black tabular-nums text-white">{drawState!.countdown}s</div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="h-14 w-14 rounded-full border-4 border-primary-500/30 border-t-primary-400 animate-spin" />
-                                <p className="text-sm font-bold text-white">Picking a winner…</p>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
             {/* Media Wrapper - Video or Image */}
             <div className="relative aspect-[16/10] overflow-hidden">
                 {raffle.videoUrl ? (

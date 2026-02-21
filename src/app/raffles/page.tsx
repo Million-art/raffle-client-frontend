@@ -1,13 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
-import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { getRaffles, purchaseTickets } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRaffleWebSocketMulti } from "@/hooks/useRaffleWebSocketMulti";
 import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
 import { Loader2, X } from "lucide-react";
 
@@ -25,22 +23,6 @@ export default function RafflesPage() {
   const [joinQuantity, setJoinQuantity] = useState(1);
   const [joinLoading, setJoinLoading] = useState(false);
   const [flash, setFlash] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [closedDraws, setClosedDraws] = useState<Set<string>>(new Set());
-
-  const raffleIds = useMemo(() => (items ?? []).map((r) => r.id), [items]);
-  const { getState } = useRaffleWebSocketMulti(raffleIds);
-
-  const { activeDrawRaffle, activeDrawState } = useMemo(() => {
-    const active = items.find((r) => {
-      if (closedDraws.has(r.id)) return false;
-      const s = getState(r.id);
-      return s.countdown !== null || s.isDrawing || (s.winnerName && s.status === 'executed');
-    });
-    return {
-      activeDrawRaffle: active,
-      activeDrawState: active ? getState(active.id) : null
-    };
-  }, [items, getState, closedDraws]);
 
   const loadRaffles = useCallback(() => {
     setLoading(true);
@@ -129,7 +111,6 @@ export default function RafflesPage() {
               Browse through verified opportunities and find your next win.
             </p>
           </div>
-
         </div>
 
         {loading ? (
@@ -160,7 +141,6 @@ export default function RafflesPage() {
                   raffle={raffle}
                   onJoinClick={handleJoinClick}
                   detailHref={`/raffles/${raffle.id}`}
-                  drawState={getState(raffle.id)}
                 />
               ))}
             </div>
@@ -208,7 +188,6 @@ export default function RafflesPage() {
           aria-modal="true"
           aria-labelledby="join-raffle-title"
         >
-          {/* ... existing modal content ... */}
           <div
             className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-md"
             onClick={(e) => e.stopPropagation()}
@@ -266,22 +245,6 @@ export default function RafflesPage() {
           </div>
         </div>
       )}
-
-      {/* Global Draw Overlay for Raffles List */}
-      <GamifiedDrawOverlay
-        isOpen={!!activeDrawRaffle && !!activeDrawState}
-        raffleName={activeDrawRaffle?.name || ""}
-        drawState={activeDrawState || { countdown: null, isDrawing: false, status: null }}
-        segments={activeDrawState?.segments}
-        winnerSectorIndex={activeDrawState?.winnerSectorIndex}
-        onClose={() => {
-          if (activeDrawRaffle) {
-            setClosedDraws((prev) => new Set(prev).add(activeDrawRaffle.id));
-            loadRaffles(); // Refresh list to update status
-          }
-        }}
-      />
-
     </main>
   );
 }

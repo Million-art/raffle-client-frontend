@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 export interface User {
   id: string;
@@ -28,34 +28,35 @@ export interface AuthResponse {
 
 /** Sign up with phone, name, and password */
 export async function signup(payload: SignupPayload): Promise<User> {
-  const data = await apiFetch<AuthResponse>("/api/auth/signup", {
+  const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/signup", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return data.user;
+  return response.data.user;
 }
 
 /** Log in with phone/email and password */
 export async function login(payload: LoginPayload): Promise<User> {
-  const data = await apiFetch<AuthResponse>("/api/auth/login", {
+  const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return data.user;
+  return response.data.user;
 }
 
 /** Log in with Google credential */
 export async function googleLogin(credential: string, isSignup: boolean = false): Promise<User> {
-  const data = await apiFetch<AuthResponse>("/api/auth/google", {
+  const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/google", {
     method: "POST",
     body: JSON.stringify({ credential, isSignup }),
   });
-  return data.user;
+  return response.data.user;
 }
 
 export async function getMe(): Promise<User | null> {
   try {
-    return await apiFetch<User>("/api/me");
+    const response = await apiFetch<ApiResponse<User>>("/api/me");
+    return response.data;
   } catch {
     return null;
   }

@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getRaffleById, purchaseTickets } from "@/services/raffles.service";
 import type { RaffleDetail } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
-import { DrawWheelSpinner } from "@/components/raffles/DrawWheelSpinner";
+import { DrawContainerReveal } from "@/components/raffles/DrawContainerReveal";
 import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { ParticipantsList } from "@/components/raffles/ParticipantsList";
 import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
@@ -16,8 +16,13 @@ import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
 export default function RaffleDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const id = params?.id as string;
+
+  const from = searchParams?.get("from");
+  const backHref = from === "my-raffles" ? "/my-raffles" : "/raffles";
+  const backLabel = from === "my-raffles" ? "Back to my raffles" : "Back to raffles";
 
   const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,8 +120,8 @@ export default function RaffleDetailPage() {
       <main className="min-h-screen bg-slate-950 pt-8 pb-24">
         <div className="container mx-auto max-w-3xl px-4">
           <p className="text-red-400 font-medium">{error ?? "Raffle not found."}</p>
-          <Link href="/raffles" className="mt-4 inline-flex items-center gap-2 text-primary-400 font-semibold hover:text-primary-300">
-            <ArrowLeft className="h-4 w-4" /> Back to raffles
+          <Link href={backHref} className="mt-4 inline-flex items-center gap-2 text-primary-400 font-semibold hover:text-primary-300">
+            <ArrowLeft className="h-4 w-4" /> {backLabel}
           </Link>
         </div>
       </main>
@@ -129,10 +134,10 @@ export default function RaffleDetailPage() {
     <main className="min-h-screen border-t border-white/5 bg-slate-950 pt-8 pb-24">
       <div className="container mx-auto max-w-4xl px-4">
         <Link
-          href="/raffles"
+          href={backHref}
           className="inline-flex items-center gap-2 text-slate-400 hover:text-white font-medium mb-6 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to raffles
+          <ArrowLeft className="h-4 w-4" /> {backLabel}
         </Link>
 
         {flash && (
@@ -211,21 +216,22 @@ export default function RaffleDetailPage() {
               segments={wheelData?.segments || []}
               winnerSectorIndex={wheelData?.winnerSectorIndex}
               onClose={() => {
-                // Optional: refresh data or just close overlay
-                loadRaffle();
+                router.push("/raffles");
               }}
             />
 
-            {/* Executed result - inline */}
-            {raffle.status === 'executed' && (raffle.winnerName || raffle.winnerId || wsWinnerName) && (
+            {/* Executed result - inline (startRevealed = no shake, overlay takes precedence when open) */}
+            {raffle.status === 'executed' && (raffle.winnerName || wsWinnerName) && (
               <div className="mb-8 rounded-2xl bg-slate-900 p-6 text-white shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
                 {wheelData ? (
-                  <DrawWheelSpinner
+                  <DrawContainerReveal
                     segments={wheelData.segments}
                     winnerSectorIndex={wheelData.winnerSectorIndex}
-                    winnerName={wsWinnerName || raffle.winnerName || raffle.winnerId || "Winner"}
+                    winnerName={wsWinnerName || raffle.winnerName || "Winner"}
                     prizeName={raffle.name}
+                    startRevealed
+                    muted
                   />
                 ) : (
                   <div className="flex flex-col items-center text-center space-y-4">
@@ -235,11 +241,8 @@ export default function RaffleDetailPage() {
                     <div>
                       <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Winner</h2>
                       <p className="text-2xl font-black text-white break-all">
-                        {raffle.winnerName || raffle.winnerId}
+                        {raffle.winnerName || "Winner"}
                       </p>
-                      {raffle.winnerName && raffle.winnerId && (
-                        <p className="text-xs text-slate-500 mt-1 uppercase tracking-tighter">ID: {raffle.winnerId}</p>
-                      )}
                     </div>
                     <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-sm font-bold border border-green-500/30">
                       Raffle Completed

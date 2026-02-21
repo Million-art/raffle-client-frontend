@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Shield, Users, Trophy, LogIn, LayoutDashboard, LogOut, UserPlus } from "lucide-react";
+import { Shield, Users, Trophy, LogIn, LayoutDashboard, LogOut, UserPlus, Ticket } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
@@ -38,16 +38,17 @@ export const Navbar = () => {
               }`}
           >
             <Users className="h-4 w-4" />
-            Explore Raffles
+            All Raffles
           </Link>
+
           {user && (
             <Link
-              href="/winners"
-              className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${pathname?.startsWith("/winners") ? "text-primary-400" : "text-slate-400"
+              href="/my-raffles"
+              className={`flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-primary-400 ${pathname?.startsWith("/my-raffles") ? "text-primary-400" : "text-slate-400"
                 }`}
             >
-              <Trophy className="h-4 w-4" />
-              Winners History
+              <Ticket className="h-4 w-4" />
+              My Raffles
             </Link>
           )}
           <div className="h-6 w-px bg-white/10" />
@@ -101,6 +102,15 @@ export const Navbar = () => {
                             <LayoutDashboard className="h-4 w-4" />
                             My dashboard
                           </Link>
+                          <Link
+                            href="/my-raffles"
+                            className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/5 ${pathname === "/my-raffles" ? "bg-primary-500/20 text-primary-400 font-semibold" : "text-slate-300"
+                              }`}
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            <Ticket className="h-4 w-4" />
+                            My Raffles
+                          </Link>
                           <button
                             type="button"
                             onClick={handleLogout}
@@ -140,6 +150,14 @@ export const Navbar = () => {
           {user && (
             <>
               <NotificationBell />
+              <Link
+                href="/my-raffles"
+                className={`rounded-full p-2 ${pathname?.startsWith("/my-raffles") ? "bg-primary-500/20 text-primary-400" : "bg-white/5 text-slate-400"
+                  }`}
+                aria-label="My Raffles"
+              >
+                <Ticket className="h-5 w-5" />
+              </Link>
               <Link
                 href="/dashboard"
                 className={`rounded-full p-2 ${pathname === "/dashboard" ? "bg-primary-500/20 text-primary-400" : "bg-white/5 text-slate-400"

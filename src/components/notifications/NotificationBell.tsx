@@ -5,6 +5,7 @@ import { Bell, Check, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getNotifications, markAsRead, markAllAsRead, getUnreadCount, type Notification } from '@/services/notifications.service';
 import { formatDistanceToNow } from 'date-fns';
+import { wsClient } from '@/lib/websocket';
 
 export const NotificationBell: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,12 +21,31 @@ export const NotificationBell: React.FC = () => {
         }
     }, [isOpen]);
 
-    // Load unread count on mount
+    // Load unread count on mount and listen to web sockets
     useEffect(() => {
         loadUnreadCount();
-        // Poll for new notifications every 30 seconds
         const interval = setInterval(loadUnreadCount, 30000);
-        return () => clearInterval(interval);
+
+        let unsubscribe: (() => void) | undefined;
+
+        if (wsClient) {
+            unsubscribe = wsClient.on('user_notification', (msg: any) => {
+                if (msg.type === 'notification' && msg.data) {
+                    const newNotif = msg.data as Notification;
+                    setNotifications(prev => {
+                        // Prevent duplicates
+                        if (prev.some(n => n.id === newNotif.id)) return prev;
+                        return [newNotif, ...prev];
+                    });
+                    setUnreadCount(prev => prev + 1);
+                }
+            });
+        }
+
+        return () => {
+            clearInterval(interval);
+            if (unsubscribe) unsubscribe();
+        };
     }, []);
 
     // Close dropdown when clicking outside
@@ -218,14 +238,16 @@ const NotificationContent: React.FC<{ notification: Notification }> = ({ notific
     return (
         <div className="flex gap-3">
             <div className="flex-shrink-0 text-xl">
-                {notification.type === 'winner_confirmation_request' && '🎉'}
-                {notification.type === 'payout_ready' && '💰'}
-                {notification.type === 'payout_completed' && '✅'}
-                {notification.type === 'prize_not_delivered' && '⚠️'}
-                {notification.type === 'raffle_approved' && '✅'}
-                {notification.type === 'raffle_rejected' && '❌'}
-                {notification.type === 'raffle_submitted' && '📋'}
-                {!['winner_confirmation_request', 'payout_ready', 'payout_completed', 'prize_not_delivered', 'raffle_approved', 'raffle_rejected', 'raffle_submitted'].includes(notification.type) && '🔔'}
+                {notification.type === 'winner_confirmation_request' && '🏆'}
+                {notification.type === 'payout_ready' && '💸'}
+                {notification.type === 'payout_completed' && '💰'}
+                {notification.type === 'prize_not_delivered' && '🚨'}
+                {notification.type === 'raffle_approved' && '🎈'}
+                {notification.type === 'raffle_rejected' && '🛑'}
+                {notification.type === 'raffle_submitted' && '📝'}
+                {notification.type === 'raffle_drawn' && '🎰'}
+                {notification.type === 'winner_compensated' && '💵'}
+                {!['winner_confirmation_request', 'payout_ready', 'payout_completed', 'prize_not_delivered', 'raffle_approved', 'raffle_rejected', 'raffle_submitted', 'raffle_drawn', 'winner_compensated'].includes(notification.type) && '✨'}
             </div>
             <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white">{notification.title}</p>

@@ -95,7 +95,7 @@ function DashboardContent() {
                   ) : (
                     <>
                       <div className="h-14 w-14 rounded-full border-4 border-primary-500/30 border-t-primary-400 animate-spin" />
-                      <p className="text-sm font-bold text-white">Picking a winner…</p>
+                      <p className="text-sm font-bold text-white">Shaking container…</p>
                     </>
                   )}
                 </div>
