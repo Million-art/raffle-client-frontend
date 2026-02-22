@@ -23,39 +23,37 @@ export interface LoginPayload {
 }
 
 export interface AuthResponse {
+  token: string;
   user: User;
 }
 
-/** Sign up with phone, name, and password */
-export async function signup(payload: SignupPayload): Promise<User> {
+export async function signup(payload: SignupPayload): Promise<AuthResponse> {
   const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/signup", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return response.data.user;
+  return response.data;
 }
 
-/** Log in with phone/email and password */
-export async function login(payload: LoginPayload): Promise<User> {
+export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return response.data.user;
+  return response.data;
 }
 
-/** Log in with Google credential */
-export async function googleLogin(credential: string, isSignup: boolean = false): Promise<User> {
+export async function googleLogin(credential: string, isSignup: boolean = false): Promise<AuthResponse> {
   const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/google", {
     method: "POST",
     body: JSON.stringify({ credential, isSignup }),
   });
-  return response.data.user;
+  return response.data;
 }
 
-export async function getMe(): Promise<User | null> {
+export async function getMe(): Promise<{ user: User; token: string } | null> {
   try {
-    const response = await apiFetch<ApiResponse<User>>("/api/me");
+    const response = await apiFetch<ApiResponse<{ user: User; token: string }>>("/api/me");
     return response.data;
   } catch {
     return null;

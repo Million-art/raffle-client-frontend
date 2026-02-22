@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getNotifications, markAsRead, markAllAsRead, getUnreadCount, type Notification } from '@/services/notifications.service';
 import { formatDistanceToNow } from 'date-fns';
 import { wsClient } from '@/lib/websocket';
+import { toast } from 'sonner';
 
 export const NotificationBell: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +39,15 @@ export const NotificationBell: React.FC = () => {
                         return [newNotif, ...prev];
                     });
                     setUnreadCount(prev => prev + 1);
+
+                    // Trigger real-time toast
+                    toast.info(newNotif.title, {
+                        description: newNotif.message,
+                        action: newNotif.actionUrl ? {
+                            label: newNotif.actionLabel || 'View',
+                            onClick: () => window.location.href = newNotif.actionUrl!
+                        } : undefined
+                    });
                 }
             });
         }
@@ -189,6 +199,10 @@ export const NotificationBell: React.FC = () => {
                                                     onClick={() => {
                                                         if (!notification.isRead) {
                                                             markAsRead(notification.id);
+                                                            setNotifications(prev =>
+                                                                prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
+                                                            );
+                                                            setUnreadCount(prev => Math.max(0, prev - 1));
                                                         }
                                                         setIsOpen(false);
                                                     }}

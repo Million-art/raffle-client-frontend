@@ -238,3 +238,11 @@ export async function confirmPrize(
   );
 }
 
+/** Fetch a single confirmation by ID */
+export async function getConfirmation(confirmationId: string): Promise<MyRaffle> {
+  const response = await apiFetch<ApiResponse<{ data: MyRaffle }>>(
+    `/api/confirmations/${confirmationId}`
+  );
+  return response.data.data;
+}
+

@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "use-sound": "^4.0.1",
     "@react-oauth/google": "^0.13.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -17,7 +16,9 @@
     "next": "16.1.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0"
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "use-sound": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
