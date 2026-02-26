@@ -33,14 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await getMe();
       if (data) {
         setUser(data.user);
-        if (data.token) localStorage.setItem('token', data.token);
       } else {
         setUser(null);
-        localStorage.removeItem('token');
       }
     } catch {
       setUser(null);
-      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -55,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await apiSignup(payload);
       setUser(data.user);
-      localStorage.setItem('token', data.token);
       return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Signup failed";
@@ -69,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await apiLogin(payload);
       setUser(data.user);
-      localStorage.setItem('token', data.token);
       return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Login failed";
@@ -83,7 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await apiGoogleLogin(credential, isSignup);
       setUser(data.user);
-      localStorage.setItem('token', data.token);
       return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Google login failed";
@@ -98,7 +92,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiLogout();
     } finally {
       setUser(null);
-      localStorage.removeItem('token');
     }
   }, []);
 

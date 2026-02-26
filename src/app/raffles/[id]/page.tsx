@@ -10,7 +10,6 @@ import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
 import { DrawContainerReveal } from "@/components/raffles/DrawContainerReveal";
 import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
-import { ParticipantsList } from "@/components/raffles/ParticipantsList";
 import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
 
 export default function RaffleDetailPage() {
