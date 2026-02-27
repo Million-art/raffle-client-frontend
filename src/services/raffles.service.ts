@@ -96,6 +96,8 @@ export interface RaffleDetail {
   createdAt?: string;
   winnerId?: string;
   winnerName?: string;
+  winnerEmail?: string;
+  winnerPhone?: string;
 }
 
 /** Raw single raffle from API (admin shape). */
@@ -114,6 +116,8 @@ interface RaffleDetailApiRaffle {
   createdAt?: string;
   winnerId?: string;
   winnerName?: string;
+  winnerEmail?: string;
+  winnerPhone?: string;
 }
 
 interface RaffleDetailResponse {
@@ -142,6 +146,8 @@ function mapDetailResponse(r: RaffleDetailApiRaffle, ticketsSold: number): Raffl
     createdAt: r.createdAt,
     winnerId: r.winnerId,
     winnerName: r.winnerName,
+    winnerEmail: r.winnerEmail,
+    winnerPhone: r.winnerPhone,
   };
 }
 
@@ -194,6 +200,8 @@ export interface MyRaffle {
   agentName?: string;
   winnerId?: string;
   winnerName?: string;
+  winnerEmail?: string;
+  winnerPhone?: string;
   joinedAt: string;
   confirmationId?: string;
   confirmationStatus?: "pending" | "confirmed" | "manually_verified" | "not_delivered" | "auto_7day" | string;

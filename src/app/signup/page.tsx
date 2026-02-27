@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendOtp, verifyOtp } from "@/services/auth.service";
 import { Shield, Eye, EyeOff } from "lucide-react";
@@ -14,11 +14,13 @@ import { GoogleLogin } from "@react-oauth/google";
 function GoogleLoginSection() {
   const { googleLogin } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/dashboard";
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       await googleLogin(credentialResponse.credential, true);
-      router.push("/dashboard");
+      router.push(redirect);
     } catch {
       // error set in context
     }
@@ -51,9 +53,12 @@ function GoogleLoginSection() {
   );
 }
 
-export default function SignupPage() {
+function SignupForm() {
   const { user, loading: authLoading, signup, error, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/dashboard";
+
   const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState("");
   const [fullName, setFullName] = useState("");
@@ -69,9 +74,9 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/dashboard");
+      router.replace(redirect);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, redirect]);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +101,7 @@ export default function SignupPage() {
     try {
       const { verificationToken } = await verifyOtp(phone.trim(), otpCode.trim());
       await signup({ phone: phone.trim(), fullName, password, confirmPassword, verificationToken });
-      router.push("/dashboard");
+      router.push(redirect);
     } catch {
       // error set in context
     } finally {
@@ -284,11 +289,26 @@ export default function SignupPage() {
 
         <p className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-primary-400 hover:text-primary-300">
+          <Link
+            href={redirect !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
+            className="font-semibold text-primary-400 hover:text-primary-300"
+          >
             Sign in
           </Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }

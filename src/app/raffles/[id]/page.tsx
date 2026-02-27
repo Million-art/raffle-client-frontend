@@ -79,7 +79,7 @@ export default function RaffleDetailPage() {
   const handleJoinClick = useCallback(() => {
     if (!user) {
       setFlash({ type: "error", text: "Please log in to join this raffle." });
-      router.push(`/login?from=/raffles/${id}`);
+      router.push(`/login?redirect=/raffles/${id}`);
       return;
     }
     setJoinModalOpen(true);

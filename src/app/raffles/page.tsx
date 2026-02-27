@@ -45,7 +45,7 @@ export default function RafflesPage() {
     (raffle: RaffleListItem) => {
       if (!user) {
         setFlash({ type: "error", text: "Please log in to join a raffle." });
-        router.push("/login?from=/raffles");
+        router.push("/login?redirect=/raffles");
         return;
       }
       setJoinRaffle(raffle);

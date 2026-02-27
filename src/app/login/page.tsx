@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
@@ -15,17 +15,21 @@ const NO_ACCOUNT_ERROR = "No account found with this email. Please sign up first
 function GoogleLoginSection() {
   const { googleLogin, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/dashboard";
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       await googleLogin(credentialResponse.credential, false);
-      router.push("/dashboard");
+      router.push(redirect);
     } catch (e) {
       if (e instanceof Error && e.message === NO_ACCOUNT_ERROR) {
         clearError();
-        router.push("/signup");
+        const signupUrl = redirect !== "/dashboard"
+          ? `/signup?redirect=${encodeURIComponent(redirect)}`
+          : "/signup";
+        router.push(signupUrl);
       }
-      // otherwise error is set in context and shown
     }
   };
 
@@ -56,9 +60,12 @@ function GoogleLoginSection() {
   );
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const { user, loading: authLoading, login, error, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/dashboard";
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -68,9 +75,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/dashboard");
+      router.replace(redirect);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +86,7 @@ export default function LoginPage() {
 
     try {
       await login({ identifier, password });
-      router.push("/dashboard");
+      router.push(redirect);
     } catch {
       // Error is handled by AuthContext
     } finally {
@@ -169,11 +176,26 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-slate-400">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-primary-400 hover:text-primary-300">
+          <Link
+            href={redirect !== "/dashboard" ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"}
+            className="font-semibold text-primary-400 hover:text-primary-300"
+          >
             Sign up
           </Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
