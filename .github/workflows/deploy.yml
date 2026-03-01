@@ -1,0 +1,124 @@
+name: Deploy Client UI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'client-frontend/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: millionmulugeta/raffle-client-ui
+  DOCKER_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Client UI
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client-frontend
+          file: ./client-frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.DOCKER_TAG }}
+            ${{ env.IMAGE_NAME }}:latest
+          no-cache: true
+          pull: true
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server via SSH (safe, with backup & rollback)
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            set -euo pipefail
+
+            APP_DIR=~/raffle-hub
+            BACKUP_DIR=~/backups
+            LAST_TAG_FILE=${APP_DIR}/.last_deployed_client_ui
+            IMAGE=${{ env.IMAGE_NAME }}
+            NEW_TAG=${{ env.DOCKER_TAG }}
+            CONTAINER_NAME=client-ui
+
+            mkdir -p "$APP_DIR" "$BACKUP_DIR"
+            cd "$APP_DIR"
+
+            LAST_TAG=""
+            if [ -f "$LAST_TAG_FILE" ]; then
+              LAST_TAG=$(cat "$LAST_TAG_FILE" || true)
+            fi
+            echo "========== Deploying Client UI =========="
+            echo "Image: ${IMAGE}:${NEW_TAG}"
+            echo "======================================="
+
+            echo "[1/8] Pulling new image ${IMAGE}:${NEW_TAG}..."
+            sudo docker pull "${IMAGE}:${NEW_TAG}"
+
+            echo "[2/8] Stopping and removing existing client-ui container (if any)..."
+            sudo docker compose -f docker-compose.prod.yml stop $CONTAINER_NAME 2>/dev/null || true
+            sudo docker compose -f docker-compose.prod.yml rm -f $CONTAINER_NAME 2>/dev/null || true
+
+            echo "[3/8] Pruning unused images and build cache..."
+            sudo docker image prune -af 2>/dev/null || true
+
+            echo "[4/8] Starting new client-ui container..."
+            export CLIENT_UI_IMAGE="${IMAGE}"
+            export CLIENT_UI_TAG="${NEW_TAG}"
+            sudo docker compose -f docker-compose.prod.yml up -d --no-deps $CONTAINER_NAME
+
+            echo "[5/8] Waiting for container to start..."
+            sleep 10
+            
+            echo "[6/8] Health check..."
+            SUCCESS=false
+            for i in $(seq 1 5); do
+              if sudo docker compose -f docker-compose.prod.yml ps $CONTAINER_NAME | grep -q 'Up'; then
+                SUCCESS=true
+                echo "Client UI container is up and running!"
+                break
+              fi
+              sleep 5
+            done
+
+            if [ "$SUCCESS" != "true" ]; then
+              echo "========== Health check FAILED =========="
+              echo "Attempting rollback..."
+              if [ -n "$LAST_TAG" ]; then
+                sudo docker pull "${IMAGE}:${LAST_TAG}" 2>/dev/null || true
+                export CLIENT_UI_TAG="$LAST_TAG"
+                sudo docker compose -f docker-compose.prod.yml up -d --no-deps $CONTAINER_NAME 2>/dev/null || true
+                sleep 5
+                echo "$LAST_TAG" > "$LAST_TAG_FILE"
+                echo "Rollback initiated."
+              fi
+              exit 1
+            fi
+
+            echo "[7/8] Saving deployed tag for future rollbacks..."
+            echo "${NEW_TAG}" > "${LAST_TAG_FILE}"
+            
+            echo "[8/8] Restarting gateway to pick up any routing changes (if needed)..."
+            sudo docker compose -f docker-compose.prod.yml restart gateway 2>/dev/null || true
+
+            echo "========== Deployment complete =========="
