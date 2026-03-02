@@ -33,7 +33,7 @@ export default function ConfirmPrizePage() {
         try {
             const data = await getConfirmation(id as string);
             setRaffle(data);
-            if (data.confirmationStatus && data.confirmationStatus !== 'pending') {
+            if ((data.confirmationStatus && data.confirmationStatus !== 'pending') || (data.status && data.status !== 'pending')) {
                 setConfirmed(true);
             }
         } catch (err) {

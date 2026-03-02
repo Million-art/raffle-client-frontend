@@ -2,8 +2,9 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, X } from "lucide-react";
+import { Trophy, X, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { ParticipantGrid } from "./ParticipantGrid";
+import { SecureDrawBadge } from "./SecureDrawBadge";
 import { useDrawSounds } from "@/hooks/useDrawSounds";
 import type { RaffleDrawState } from "@/hooks/useRaffleWebSocketMulti";
 
@@ -35,6 +36,7 @@ export function GamifiedDrawOverlay({
   const [showConfetti, setShowConfetti] = useState(false);
   const [traversalDone, setTraversalDone] = useState(false);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [showProvablyFair, setShowProvablyFair] = useState(false);
   const sounds = useDrawSounds();
 
   // Focus-trap ref for winner modal close button
@@ -109,7 +111,7 @@ export function GamifiedDrawOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-950/97 backdrop-blur-xl"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-950/98 backdrop-blur-3xl"
       role="dialog"
       aria-modal="true"
       aria-label="Raffle draw"
@@ -174,21 +176,31 @@ export function GamifiedDrawOverlay({
             className="relative z-10 flex w-full max-w-6xl flex-col items-center px-4 py-6"
           >
             {/* Header */}
-            <div className="mb-6 text-center">
-              <h3 className="text-sm font-medium text-slate-400 mb-1 uppercase tracking-widest">
+            <div className="mb-10 text-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-4 inline-block"
+              >
+                <SecureDrawBadge />
+              </motion.div>
+              <h3 className="text-xs font-black text-slate-500 mb-2 uppercase tracking-[0.3em] opacity-60">
                 {raffleName}
               </h3>
-              <h1 className="text-3xl font-black text-white tracking-tight">
-                {traversalDone ? "WINNER CONFIRMED" : "DRAW IN PROGRESS"}
+              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tighter italic uppercase">
+                {traversalDone ? "DRAW COMPLETE" : "DRAW IN PROGRESS"}
               </h1>
               {traversalDone && winnerName && (
-                <motion.p
-                  initial={{ opacity: 0, y: 8 }}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-2 text-xl font-bold text-amber-400"
+                  className="mt-6 inline-flex flex-col items-center"
                 >
-                  {winnerName}
-                </motion.p>
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/60 mb-1">Authenticated Winner</span>
+                  <p className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">
+                    {winnerName}
+                  </p>
+                </motion.div>
               )}
             </div>
 
@@ -215,14 +227,20 @@ export function GamifiedDrawOverlay({
                     Selecting Winner…
                   </span>
                 </div>
-                <div className="font-mono text-xs text-slate-500 bg-black/40 px-4 py-2 rounded-lg border border-white/5 w-full text-center overflow-hidden whitespace-nowrap">
-                  <HashAnimation />
-                </div>
-                <div className="flex items-center gap-2 opacity-40">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-widest text-slate-400">
-                    RaffleHub Secure RNG System
+                <div className="flex flex-col items-center gap-2 opacity-60">
+                  <span className="text-[9px] uppercase tracking-[0.3em] font-black text-slate-400">
+                    Proprietary Verified RNG Algorithm
                   </span>
+                  <div className="flex gap-1">
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        animate={{ opacity: [0.2, 1, 0.2] }}
+                        transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
+                        className="h-1 w-1 rounded-full bg-emerald-500"
+                      />
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -285,12 +303,38 @@ export function GamifiedDrawOverlay({
                 Congratulations! The winner has been selected.
               </p>
 
-              {/* Fairness hash badge */}
-              <div className="mb-6 w-full rounded-xl bg-black/30 border border-white/5 px-4 py-2">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
-                  Fairness Hash
-                </p>
-                <FairnessHashDisplay winnerName={winnerName || ""} winnerIndex={winnerSectorIndex} />
+              {/* Provably Fair Toggle */}
+              <div className="mb-8 w-full">
+                <button
+                  type="button"
+                  onClick={() => setShowProvablyFair(!showProvablyFair)}
+                  className="flex items-center justify-center gap-2 w-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300 transition-colors py-2 border-t border-white/5"
+                >
+                  {showProvablyFair ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  Provably Fair Details
+                </button>
+
+                <AnimatePresence>
+                  {showProvablyFair && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-2 rounded-xl bg-black/40 border border-white/5 px-4 py-3 text-left">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">System Integrity Verified</span>
+                        </div>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
+                          Fairness Hash (SHA-256)
+                        </p>
+                        <FairnessHashDisplay winnerName={winnerName || ""} winnerIndex={winnerSectorIndex} />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Actions */}

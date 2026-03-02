@@ -55,10 +55,10 @@ const Tile = memo(function Tile({
         "relative flex items-center justify-center rounded-lg border text-center font-semibold leading-tight transition-all duration-150 will-change-transform overflow-hidden cursor-default select-none";
 
     const stateClass = isWinner
-        ? "border-amber-400 bg-amber-500/25 text-amber-200 scale-105 z-10 shadow-[0_0_16px_4px_rgba(251,191,36,0.45)]"
+        ? "border-amber-400 bg-amber-500/30 text-white scale-[1.08] z-20 shadow-[0_0_30px_rgba(251,191,36,0.6)] ring-2 ring-amber-400/50"
         : isActive
-            ? "border-amber-400/80 bg-amber-500/15 text-white scale-[1.05] z-10 shadow-[0_0_12px_2px_rgba(251,191,36,0.3)]"
-            : "border-white/10 bg-slate-800/70 text-slate-300 hover:border-white/20";
+            ? "border-emerald-400/80 bg-emerald-500/20 text-white scale-[1.05] z-10 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+            : "border-white/5 bg-slate-900/40 text-slate-400 hover:border-white/20 hover:bg-slate-800/60";
 
     return (
         <motion.div
@@ -78,12 +78,14 @@ const Tile = memo(function Tile({
         >
             {/* inner glow shard for active/winner */}
             {(isActive || isWinner) && (
-                <span
+                <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     className="pointer-events-none absolute inset-0 rounded-lg"
                     style={{
                         background: isWinner
-                            ? "radial-gradient(circle at 50% 50%, rgba(251,191,36,0.2) 0%, transparent 70%)"
-                            : "radial-gradient(circle at 50% 50%, rgba(251,191,36,0.12) 0%, transparent 70%)",
+                            ? "radial-gradient(circle at 50% 50%, rgba(251,191,36,0.3) 0%, transparent 80%)"
+                            : "radial-gradient(circle at 50% 50%, rgba(16,185,129,0.2) 0%, transparent 80%)",
                     }}
                 />
             )}
@@ -232,8 +234,8 @@ export const ParticipantGrid = memo(function ParticipantGrid({
 
     return (
         <div
-            className="w-full overflow-y-auto"
-            style={{ maxHeight: "55vh" }}
+            className="w-full overflow-y-auto px-2 py-4 custom-scrollbar"
+            style={{ maxHeight: "50vh" }}
             aria-label="Participant grid"
         >
             <div

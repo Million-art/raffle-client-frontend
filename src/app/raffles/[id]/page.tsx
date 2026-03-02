@@ -242,6 +242,14 @@ export default function RaffleDetailPage() {
                       <p className="text-2xl font-black text-white break-all">
                         {raffle.winnerName || "Winner"}
                       </p>
+                      <div className="mt-2 space-y-1">
+                        {raffle.winnerEmail && (
+                          <p className="text-sm text-slate-400 font-medium">{raffle.winnerEmail}</p>
+                        )}
+                        {raffle.winnerPhone && (
+                          <p className="text-sm text-slate-400 font-medium">{raffle.winnerPhone}</p>
+                        )}
+                      </div>
                     </div>
                     <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-sm font-bold border border-green-500/30">
                       Raffle Completed
