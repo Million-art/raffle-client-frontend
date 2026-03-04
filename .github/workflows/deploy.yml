@@ -54,12 +54,12 @@ jobs:
           script: |
             set -euo pipefail
 
-            APP_DIR=~/raffle-hub
+            APP_DIR=~/carramarket
             BACKUP_DIR=~/backups
             LAST_TAG_FILE=${APP_DIR}/.last_deployed_client_ui
             IMAGE=${{ env.IMAGE_NAME }}
             NEW_TAG=${{ env.DOCKER_TAG }}
-            CONTAINER_NAME=client-ui
+            CONTAINER_NAME=client-frontend
 
             mkdir -p "$APP_DIR" "$BACKUP_DIR"
             cd "$APP_DIR"
@@ -76,8 +76,8 @@ jobs:
             sudo docker pull "${IMAGE}:${NEW_TAG}"
 
             echo "[2/8] Stopping and removing existing client-ui container (if any)..."
-            sudo docker compose -f docker-compose.prod.yml stop $CONTAINER_NAME 2>/dev/null || true
-            sudo docker compose -f docker-compose.prod.yml rm -f $CONTAINER_NAME 2>/dev/null || true
+            sudo docker compose -f docker-compose.yml stop $CONTAINER_NAME 2>/dev/null || true
+            sudo docker compose -f docker-compose.yml rm -f $CONTAINER_NAME 2>/dev/null || true
 
             echo "[3/8] Pruning unused images and build cache..."
             sudo docker image prune -af 2>/dev/null || true
@@ -85,7 +85,7 @@ jobs:
             echo "[4/8] Starting new client-ui container..."
             export CLIENT_UI_IMAGE="${IMAGE}"
             export CLIENT_UI_TAG="${NEW_TAG}"
-            sudo docker compose -f docker-compose.prod.yml up -d --no-deps $CONTAINER_NAME
+            sudo docker compose -f docker-compose.yml up -d --no-deps $CONTAINER_NAME
 
             echo "[5/8] Waiting for container to start..."
             sleep 10
@@ -93,7 +93,7 @@ jobs:
             echo "[6/8] Health check..."
             SUCCESS=false
             for i in $(seq 1 5); do
-              if sudo docker compose -f docker-compose.prod.yml ps $CONTAINER_NAME | grep -q 'Up'; then
+              if sudo docker compose -f docker-compose.yml ps $CONTAINER_NAME | grep -q 'Up'; then
                 SUCCESS=true
                 echo "Client UI container is up and running!"
                 break
@@ -107,7 +107,7 @@ jobs:
               if [ -n "$LAST_TAG" ]; then
                 sudo docker pull "${IMAGE}:${LAST_TAG}" 2>/dev/null || true
                 export CLIENT_UI_TAG="$LAST_TAG"
-                sudo docker compose -f docker-compose.prod.yml up -d --no-deps $CONTAINER_NAME 2>/dev/null || true
+                sudo docker compose -f docker-compose.yml up -d --no-deps $CONTAINER_NAME 2>/dev/null || true
                 sleep 5
                 echo "$LAST_TAG" > "$LAST_TAG_FILE"
                 echo "Rollback initiated."
@@ -119,6 +119,6 @@ jobs:
             echo "${NEW_TAG}" > "${LAST_TAG_FILE}"
             
             echo "[8/8] Restarting gateway to pick up any routing changes (if needed)..."
-            sudo docker compose -f docker-compose.prod.yml restart gateway 2>/dev/null || true
+            sudo docker compose -f docker-compose.yml restart gateway 2>/dev/null || true
 
             echo "========== Deployment complete =========="
