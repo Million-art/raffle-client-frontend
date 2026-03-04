@@ -83,7 +83,12 @@ jobs:
             sudo docker image prune -af 2>/dev/null || true
 
             echo "[4/8] Starting new client-frontend container..."
-            sudo CLIENT_UI_TAG="${NEW_TAG}" docker compose -f docker-compose.yml up -d --no-deps $CONTAINER_NAME
+            sudo \
+              CLIENT_UI_TAG="${NEW_TAG}" \
+              ADMIN_UI_TAG="latest" \
+              ADMIN_API_TAG="latest" \
+              CLIENT_API_TAG="latest" \
+              docker compose -f docker-compose.yml up -d --no-deps $CONTAINER_NAME
 
             echo "[5/8] Waiting for container to start..."
             sleep 10
@@ -117,6 +122,11 @@ jobs:
             echo "${NEW_TAG}" > "${LAST_TAG_FILE}"
             
             echo "[8/8] Restarting gateway to pick up any routing changes (if needed)..."
-            sudo docker compose -f docker-compose.yml restart gateway 2>/dev/null || true
+            sudo \
+              ADMIN_API_TAG="latest" \
+              CLIENT_API_TAG="latest" \
+              ADMIN_UI_TAG="latest" \
+              CLIENT_UI_TAG="latest" \
+              docker compose -f docker-compose.yml restart gateway 2>/dev/null || true
 
             echo "========== Deployment complete =========="
