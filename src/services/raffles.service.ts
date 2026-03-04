@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 export interface RaffleListItem {
   id: string;
@@ -49,26 +49,22 @@ function mapApiItemToCard(item: RaffleApiItem): RaffleListItem {
   };
 }
 
-/** Admin API wraps payload in { success, message, data } */
-interface AdminRafflesResponse {
-  success?: boolean;
-  data?: RafflesListResponse;
-}
-
 export async function getRaffles(options?: {
   page?: number;
   limit?: number;
+  liveOnly?: boolean;
 }): Promise<{ items: RaffleListItem[]; total: number; page: number; limit: number }> {
   const page = options?.page ?? 1;
   const limit = options?.limit ?? 20;
-  const raw = await apiFetch<RafflesListResponse | AdminRafflesResponse>(
-    `/api/raffles?page=${page}&limit=${limit}`
+  const liveOnly = options?.liveOnly ?? false;
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (liveOnly) params.set("live_only", "true");
+
+  const response = await apiFetch<ApiResponse<RafflesListResponse>>(
+    `/api/raffles?${params.toString()}`
   );
-  // Support both client-backend shape { items, total, ... } and admin shape { data: { items, total, ... } }
-  const data =
-    "data" in raw && raw.data != null
-      ? (raw as AdminRafflesResponse).data!
-      : (raw as RafflesListResponse);
+  const data = response.data;
+
   return {
     items: (data.items ?? []).map(mapApiItemToCard),
     total: data.total ?? 0,
@@ -100,6 +96,8 @@ export interface RaffleDetail {
   createdAt?: string;
   winnerId?: string;
   winnerName?: string;
+  winnerEmail?: string;
+  winnerPhone?: string;
 }
 
 /** Raw single raffle from API (admin shape). */
@@ -116,8 +114,10 @@ interface RaffleDetailApiRaffle {
   media?: RaffleMediaItem[];
   agent?: { displayName?: string };
   createdAt?: string;
-  winner_id?: string;
-  winner_name?: string;
+  winnerId?: string;
+  winnerName?: string;
+  winnerEmail?: string;
+  winnerPhone?: string;
 }
 
 interface RaffleDetailResponse {
@@ -144,22 +144,21 @@ function mapDetailResponse(r: RaffleDetailApiRaffle, ticketsSold: number): Raffl
     agentName: r.agent?.displayName,
     status: r.status,
     createdAt: r.createdAt,
-    winnerId: r.winner_id,
-    winnerName: r.winner_name,
+    winnerId: r.winnerId,
+    winnerName: r.winnerName,
+    winnerEmail: r.winnerEmail,
+    winnerPhone: r.winnerPhone,
   };
 }
 
 export async function getRaffleById(id: string): Promise<RaffleDetail> {
-  const raw = await apiFetch<RaffleDetailResponse & { data?: { raffle?: RaffleDetailApiRaffle; ticketsSold?: number } }>(
+  const response = await apiFetch<ApiResponse<{ raffle?: RaffleDetailApiRaffle; ticketsSold?: number }>>(
     `/api/raffles/${id}`
   );
-  // Client-backend returns { raffle, ticketsSold }; admin wrapper would be { data: { raffle, ticketsSold } }
-  const data =
-    raw.data != null && typeof raw.data === "object" && "raffle" in raw.data
-      ? raw.data
-      : raw;
-  const raffle = (data as { raffle?: RaffleDetailApiRaffle }).raffle;
-  const ticketsSold = (data as { ticketsSold?: number }).ticketsSold ?? 0;
+  const data = response.data;
+  const raffle = data.raffle;
+  const ticketsSold = data.ticketsSold ?? 0;
+
   if (!raffle || typeof raffle !== "object") throw new Error("Raffle not found");
   return mapDetailResponse(raffle, ticketsSold);
 }
@@ -171,24 +170,87 @@ export async function purchaseTickets(
   transactionId?: string,
   participantName?: string,
   participantEmail?: string
-): Promise<{ raffle_id: string; participant_id: string; quantity: number }> {
+): Promise<{ raffle_id: string; participant_id: string; quantity: number; checkout_url?: string }> {
   const body: { quantity: number; transaction_id?: string; participant_name?: string; participant_email?: string } = { quantity };
   if (transactionId) body.transaction_id = transactionId;
   if (participantName) body.participant_name = participantName;
   if (participantEmail) body.participant_email = participantEmail;
-  const res = await apiFetch<{
-    success?: boolean;
-    data?: { raffle_id: string; participant_id: string; quantity: number };
-    raffle_id?: string;
-    participant_id?: string;
-    quantity?: number;
-  }>(`/api/raffles/${raffleId}/purchase`, {
+
+  const response = await apiFetch<ApiResponse<{ raffle_id: string; participant_id: string; quantity: number; checkout_url?: string }>>(
+    `/api/raffles/${raffleId}/purchase`, {
     method: "POST",
     body: JSON.stringify(body),
-  });
-  const data = res.data;
-  if (data && typeof data.raffle_id !== "undefined") return data;
-  if (typeof (res as { raffle_id?: string }).raffle_id !== "undefined")
-    return { raffle_id: res.raffle_id!, participant_id: res.participant_id!, quantity: res.quantity! };
-  throw new Error("Invalid purchase response");
+  }
+  );
+  return response.data;
 }
+
+/** A raffle the authenticated participant has joined */
+export interface MyRaffle {
+  raffleId: string;
+  raffleName: string;
+  description: string;
+  ticketPrice: number;
+  totalTickets: number;
+  ticketsSold: number;
+  myTickets: number;
+  status: "active" | "locked" | "executed" | string;
+  imageUrl?: string;
+  videoUrl?: string;
+  agentName?: string;
+  winnerId?: string;
+  winnerName?: string;
+  winnerEmail?: string;
+  winnerPhone?: string;
+  joinedAt: string;
+  confirmationId?: string;
+  confirmationStatus?: "pending" | "confirmed" | "manually_verified" | "not_delivered" | "auto_7day" | string;
+}
+
+/** Fetch the authenticated user's raffle participations */
+export async function getMyRaffles(options?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}): Promise<{ raffles: MyRaffle[]; total: number }> {
+  const params = new URLSearchParams();
+  if (options?.page) params.set("page", String(options.page));
+  if (options?.limit) params.set("limit", String(options.limit));
+  if (options?.status) params.set("status", options.status);
+
+  const response = await apiFetch<ApiResponse<{ raffles: MyRaffle[]; total: number }>>(
+    `/api/me/raffles${params.toString() ? "?" + params.toString() : ""}`
+  );
+  return {
+    raffles: response.data?.raffles ?? [],
+    total: response.data?.total ?? 0
+  };
+}
+
+/** Confirm prize receipt and provide feedback */
+export async function confirmPrize(
+  confirmationId: string,
+  data: {
+    prizeReceived: boolean;
+    prizeMatches: boolean;
+    rating: number;
+    feedback: string;
+  }
+): Promise<void> {
+  await apiFetch<ApiResponse<void>>(
+    `/api/confirmations/${confirmationId}/confirm`,
+    {
+      method: "POST",
+      body: JSON.stringify(data)
+    }
+  );
+}
+
+/** Fetch a single confirmation by ID */
+export async function getConfirmation(confirmationId: string): Promise<MyRaffle> {
+  const response = await apiFetch<ApiResponse<{ data: MyRaffle }>>(
+    `/api/confirmations/${confirmationId}`
+  );
+  return response.data.data;
+}
+

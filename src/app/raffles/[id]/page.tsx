@@ -1,20 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getRaffleById, purchaseTickets } from "@/services/raffles.service";
 import type { RaffleDetail } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
+import { DrawContainerReveal } from "@/components/raffles/DrawContainerReveal";
+import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
 
 export default function RaffleDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const id = params?.id as string;
+
+  const from = searchParams?.get("from");
+  const backHref = from === "my-raffles" ? "/my-raffles" : "/raffles";
+  const backLabel = from === "my-raffles" ? "Back to my raffles" : "Back to raffles";
 
   const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +33,8 @@ export default function RaffleDetailPage() {
     countdown,
     isDrawing,
     winnerId: wsWinnerId,
-    winnerName: wsWinnerName
+    winnerName: wsWinnerName,
+    wheelData,
   } = useRaffleWebSocket(id);
 
   const [joinQuantity, setJoinQuantity] = useState(1);
@@ -71,7 +79,7 @@ export default function RaffleDetailPage() {
   const handleJoinClick = useCallback(() => {
     if (!user) {
       setFlash({ type: "error", text: "Please log in to join this raffle." });
-      router.push(`/login?from=/raffles/${id}`);
+      router.push(`/login?redirect=/raffles/${id}`);
       return;
     }
     setJoinModalOpen(true);
@@ -83,10 +91,15 @@ export default function RaffleDetailPage() {
     setJoinLoading(true);
     setFlash(null);
     try {
-      await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email);
-      setFlash({ type: "success", text: `You joined with ${joinQuantity} ticket(s).` });
-      setJoinModalOpen(false);
-      loadRaffle();
+      const data = await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email);
+      if (data.checkout_url) {
+        setFlash({ type: "success", text: "Redirecting to payment..." });
+        window.location.href = data.checkout_url;
+      } else {
+        setFlash({ type: "success", text: `You joined with ${joinQuantity} ticket(s).` });
+        setJoinModalOpen(false);
+        loadRaffle();
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to join raffle";
       setFlash({ type: "error", text: msg });
@@ -94,6 +107,15 @@ export default function RaffleDetailPage() {
       setJoinLoading(false);
     }
   }, [raffle, joinQuantity, loadRaffle, user]);
+
+  useEffect(() => {
+    const payment = searchParams?.get("payment");
+    if (payment === "success") {
+      setFlash({ type: "success", text: "Payment received! Your tickets are being issued." });
+    } else if (payment === "failed") {
+      setFlash({ type: "error", text: "Payment failed or was cancelled." });
+    }
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -111,8 +133,8 @@ export default function RaffleDetailPage() {
       <main className="min-h-screen bg-slate-950 pt-8 pb-24">
         <div className="container mx-auto max-w-3xl px-4">
           <p className="text-red-400 font-medium">{error ?? "Raffle not found."}</p>
-          <Link href="/raffles" className="mt-4 inline-flex items-center gap-2 text-primary-400 font-semibold hover:text-primary-300">
-            <ArrowLeft className="h-4 w-4" /> Back to raffles
+          <Link href={backHref} className="mt-4 inline-flex items-center gap-2 text-primary-400 font-semibold hover:text-primary-300">
+            <ArrowLeft className="h-4 w-4" /> {backLabel}
           </Link>
         </div>
       </main>
@@ -125,10 +147,10 @@ export default function RaffleDetailPage() {
     <main className="min-h-screen border-t border-white/5 bg-slate-950 pt-8 pb-24">
       <div className="container mx-auto max-w-4xl px-4">
         <Link
-          href="/raffles"
+          href={backHref}
           className="inline-flex items-center gap-2 text-slate-400 hover:text-white font-medium mb-6 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to raffles
+          <ArrowLeft className="h-4 w-4" /> {backLabel}
         </Link>
 
         {flash && (
@@ -191,34 +213,40 @@ export default function RaffleDetailPage() {
               <p className="text-right text-xs font-bold text-primary-600">{Math.round(progress)}% filled</p>
             </div>
 
-            {/* Real-time Draw Overlay */}
-            {(countdown !== null || isDrawing || raffle.status === 'executed') && (
+            {/* Full-screen draw overlay - cannot be closed until draw completes */}
+            {/* Gamified Full-Screen Overlay */}
+            <GamifiedDrawOverlay
+              isOpen={countdown !== null || isDrawing || (raffle.status === 'executed' && !!(wsWinnerName || raffle.winnerName))}
+              raffleName={raffle.name}
+              drawState={{
+                countdown,
+                isDrawing,
+                status: wsStatus || raffle.status || null,
+                winnerId: wsWinnerId || raffle.winnerId,
+                winnerName: wsWinnerName || raffle.winnerName,
+                ticketsSold: wsTicketsSold ?? raffle.ticketsSold,
+              }}
+              segments={wheelData?.segments || []}
+              winnerSectorIndex={wheelData?.winnerSectorIndex}
+              onClose={() => {
+                router.push("/raffles");
+              }}
+            />
+
+            {/* Executed result - inline (startRevealed = no shake, overlay takes precedence when open) */}
+            {raffle.status === 'executed' && (raffle.winnerName || wsWinnerName) && (
               <div className="mb-8 rounded-2xl bg-slate-900 p-6 text-white shadow-xl relative overflow-hidden">
-                {/* Background decoration */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
-
-                {countdown !== null && (
-                  <div className="flex flex-col items-center text-center">
-                    <p className="text-primary-400 font-bold uppercase tracking-widest text-xs mb-2">The draw is starting!</p>
-                    <div className="text-5xl font-black mb-2 tabular-nums">{countdown}s</div>
-                    <p className="text-slate-400 text-sm">Waiting for all tickets to clear and participants to join the live view...</p>
-                  </div>
-                )}
-
-                {isDrawing && (
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 relative">
-                      <div className="h-16 w-16 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-8 w-8 bg-primary-500 rounded-full animate-ping opacity-25" />
-                      </div>
-                    </div>
-                    <h2 className="text-2xl font-bold mb-1">Picking a winner...</h2>
-                    <p className="text-slate-400 text-sm italic">Expanding tickets and generating secure random result</p>
-                  </div>
-                )}
-
-                {raffle.status === 'executed' && (raffle.winnerName || raffle.winnerId) && (
+                {wheelData ? (
+                  <DrawContainerReveal
+                    segments={wheelData.segments}
+                    winnerSectorIndex={wheelData.winnerSectorIndex}
+                    winnerName={wsWinnerName || raffle.winnerName || "Winner"}
+                    prizeName={raffle.name}
+                    startRevealed
+                    muted
+                  />
+                ) : (
                   <div className="flex flex-col items-center text-center space-y-4">
                     <div className="bg-primary-500/20 text-primary-400 p-3 rounded-full mb-2">
                       <User className="h-8 w-8" />
@@ -226,11 +254,16 @@ export default function RaffleDetailPage() {
                     <div>
                       <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Winner</h2>
                       <p className="text-2xl font-black text-white break-all">
-                        {raffle.winnerName || raffle.winnerId}
+                        {raffle.winnerName || "Winner"}
                       </p>
-                      {raffle.winnerName && raffle.winnerId && (
-                        <p className="text-xs text-slate-500 mt-1 uppercase tracking-tighter">ID: {raffle.winnerId}</p>
-                      )}
+                      <div className="mt-2 space-y-1">
+                        {raffle.winnerEmail && (
+                          <p className="text-sm text-slate-400 font-medium">{raffle.winnerEmail}</p>
+                        )}
+                        {raffle.winnerPhone && (
+                          <p className="text-sm text-slate-400 font-medium">{raffle.winnerPhone}</p>
+                        )}
+                      </div>
                     </div>
                     <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-sm font-bold border border-green-500/30">
                       Raffle Completed
@@ -257,6 +290,7 @@ export default function RaffleDetailPage() {
             </div>
           </div>
         </article>
+
       </div>
 
       {/* Join modal */}

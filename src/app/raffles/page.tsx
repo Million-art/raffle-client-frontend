@@ -6,7 +6,8 @@ import { RaffleCard } from "@/components/raffles/RaffleCard";
 import { getRaffles, purchaseTickets } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Filter, Loader2, X } from "lucide-react";
+import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
+import { Loader2, X } from "lucide-react";
 
 export default function RafflesPage() {
   const router = useRouter();
@@ -38,11 +39,13 @@ export default function RafflesPage() {
     loadRaffles();
   }, [loadRaffles]);
 
+  useRaffleListUpdates(loadRaffles);
+
   const handleJoinClick = useCallback(
     (raffle: RaffleListItem) => {
       if (!user) {
         setFlash({ type: "error", text: "Please log in to join a raffle." });
-        router.push("/login?from=/raffles");
+        router.push("/login?redirect=/raffles");
         return;
       }
       setJoinRaffle(raffle);
@@ -79,11 +82,10 @@ export default function RafflesPage() {
       <div className="container relative z-10 mx-auto max-w-7xl px-4">
         {flash && (
           <div
-            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${
-              flash.type === "success"
-                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/20 bg-red-500/10 text-red-400"
-            }`}
+            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${flash.type === "success"
+              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              : "border-red-500/20 bg-red-500/10 text-red-400"
+              }`}
             role="alert"
           >
             {flash.text}
@@ -108,24 +110,6 @@ export default function RafflesPage() {
             <p className="mt-2 font-medium text-slate-400">
               Browse through verified opportunities and find your next win.
             </p>
-          </div>
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search by name or agent..."
-                className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-sm font-medium text-white placeholder-slate-500 outline-none transition-all focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20"
-              />
-            </div>
-            <button
-              type="button"
-              className="flex h-12 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 text-sm font-bold text-white transition-all hover:bg-white/10"
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-            </button>
           </div>
         </div>
 
@@ -152,7 +136,12 @@ export default function RafflesPage() {
           <>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((raffle) => (
-                <RaffleCard key={raffle.id} raffle={raffle} onJoinClick={handleJoinClick} detailHref={`/raffles/${raffle.id}`} />
+                <RaffleCard
+                  key={raffle.id}
+                  raffle={raffle}
+                  onJoinClick={handleJoinClick}
+                  detailHref={`/raffles/${raffle.id}`}
+                />
               ))}
             </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import type { User, SignupPayload, LoginPayload } from "@/services/auth.service";
+import type { User, SignupPayload, LoginPayload, AuthResponse } from "@/services/auth.service";
 import {
   getMe,
   signup as apiSignup,
@@ -13,9 +13,9 @@ import {
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  signup: (payload: SignupPayload) => Promise<User>;
-  login: (payload: LoginPayload) => Promise<User>;
-  googleLogin: (credential: string, isSignup?: boolean) => Promise<User>;
+  signup: (payload: SignupPayload) => Promise<AuthResponse>;
+  login: (payload: LoginPayload) => Promise<AuthResponse>;
+  googleLogin: (credential: string, isSignup?: boolean) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   error: string | null;
   clearError: () => void;
@@ -30,8 +30,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUser = useCallback(async () => {
     try {
-      const me = await getMe();
-      setUser(me);
+      const data = await getMe();
+      if (data) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
     } catch {
       setUser(null);
     } finally {
@@ -46,9 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = useCallback(async (payload: SignupPayload) => {
     setError(null);
     try {
-      const u = await apiSignup(payload);
-      setUser(u);
-      return u;
+      const data = await apiSignup(payload);
+      setUser(data.user);
+      return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Signup failed";
       setError(message);
@@ -59,9 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (payload: LoginPayload) => {
     setError(null);
     try {
-      const u = await apiLogin(payload);
-      setUser(u);
-      return u;
+      const data = await apiLogin(payload);
+      setUser(data.user);
+      return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Login failed";
       setError(message);
@@ -72,9 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const googleLogin = useCallback(async (credential: string, isSignup: boolean = false) => {
     setError(null);
     try {
-      const u = await apiGoogleLogin(credential, isSignup);
-      setUser(u);
-      return u;
+      const data = await apiGoogleLogin(credential, isSignup);
+      setUser(data.user);
+      return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Google login failed";
       setError(message);

@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 export interface User {
   id: string;
@@ -15,6 +15,7 @@ export interface SignupPayload {
   fullName: string;
   password: string;
   confirmPassword: string;
+  verificationToken?: string;
 }
 
 export interface LoginPayload {
@@ -26,36 +27,50 @@ export interface AuthResponse {
   user: User;
 }
 
-/** Sign up with phone, name, and password */
-export async function signup(payload: SignupPayload): Promise<User> {
-  const data = await apiFetch<AuthResponse>("/api/auth/signup", {
+export async function signup(payload: SignupPayload): Promise<AuthResponse> {
+  const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/signup", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return data.user;
+  return response.data;
 }
 
-/** Log in with phone/email and password */
-export async function login(payload: LoginPayload): Promise<User> {
-  const data = await apiFetch<AuthResponse>("/api/auth/login", {
+export async function sendOtp(phone: string): Promise<{ sent: boolean }> {
+  const response = await apiFetch<ApiResponse<{ sent: boolean }>>("/api/auth/send-otp", {
+    method: "POST",
+    body: JSON.stringify({ phone }),
+  });
+  return response.data;
+}
+
+export async function verifyOtp(phone: string, code: string): Promise<{ verificationToken: string }> {
+  const response = await apiFetch<ApiResponse<{ verificationToken: string }>>("/api/auth/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ phone, code }),
+  });
+  return response.data;
+}
+
+export async function login(payload: LoginPayload): Promise<AuthResponse> {
+  const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return data.user;
+  return response.data;
 }
 
-/** Log in with Google credential */
-export async function googleLogin(credential: string, isSignup: boolean = false): Promise<User> {
-  const data = await apiFetch<AuthResponse>("/api/auth/google", {
+export async function googleLogin(credential: string, isSignup: boolean = false): Promise<AuthResponse> {
+  const response = await apiFetch<ApiResponse<AuthResponse>>("/api/auth/google", {
     method: "POST",
     body: JSON.stringify({ credential, isSignup }),
   });
-  return data.user;
+  return response.data;
 }
 
-export async function getMe(): Promise<User | null> {
+export async function getMe(): Promise<{ user: User } | null> {
   try {
-    return await apiFetch<User>("/api/me");
+    const response = await apiFetch<ApiResponse<{ user: User }>>("/api/me");
+    return response.data;
   } catch {
     return null;
   }

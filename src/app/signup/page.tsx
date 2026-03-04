@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { sendOtp, verifyOtp } from "@/services/auth.service";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -13,11 +14,13 @@ import { GoogleLogin } from "@react-oauth/google";
 function GoogleLoginSection() {
   const { googleLogin } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/dashboard";
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       await googleLogin(credentialResponse.credential, true);
-      router.push("/dashboard");
+      router.push(redirect);
     } catch {
       // error set in context
     }
@@ -43,38 +46,62 @@ function GoogleLoginSection() {
           theme="outline"
           shape="pill"
           width="320"
+          text="signup_with"
         />
       </div>
     </>
   );
 }
 
-export default function SignupPage() {
+function SignupForm() {
   const { user, loading: authLoading, signup, error, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/dashboard";
+
+  const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
 
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/dashboard");
+      router.replace(redirect);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, redirect]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    if (!phone.trim()) return;
+    setSendingCode(true);
+    try {
+      await sendOtp(phone.trim());
+      setStep(2);
+    } catch {
+      // error set in context
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyAndSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearError();
+    if (!otpCode.trim()) return;
     setSubmitting(true);
     try {
-      await signup({ phone, fullName, password, confirmPassword });
-      router.push("/dashboard");
+      const { verificationToken } = await verifyOtp(phone.trim(), otpCode.trim());
+      await signup({ phone: phone.trim(), fullName, password, confirmPassword, verificationToken });
+      router.push(redirect);
     } catch {
       // error set in context
     } finally {
@@ -82,7 +109,15 @@ export default function SignupPage() {
     }
   };
 
-  const isLoading = authLoading || submitting;
+  const handleSubmit = async (e: React.FormEvent) => {
+    if (step === 1) {
+      handleSendCode(e);
+    } else {
+      handleVerifyAndSignup(e);
+    }
+  };
+
+  const isLoading = authLoading || submitting || sendingCode;
 
   if (authLoading) {
     return (
@@ -119,92 +154,133 @@ export default function SignupPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="signup-phone" className="mb-1.5 block text-sm font-semibold text-slate-300">
-              Phone Number
-            </label>
-            <input
-              id="signup-phone"
-              type="tel"
-              autoComplete="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              placeholder="+251 9 12 34 56 78"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="signup-name" className="mb-1.5 block text-sm font-semibold text-slate-300">
-              Full Name
-            </label>
-            <input
-              id="signup-name"
-              type="text"
-              autoComplete="name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-              placeholder="Your full name"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-slate-300">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="signup-password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                placeholder="At least 6 characters"
-                required
-                minLength={6}
-              />
+          {step === 1 ? (
+            <>
+              <div>
+                <label htmlFor="signup-phone" className="mb-1.5 block text-sm font-semibold text-slate-300">
+                  Phone Number
+                </label>
+                <input
+                  id="signup-phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  placeholder="+251 9 12 34 56 78"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="signup-name" className="mb-1.5 block text-sm font-semibold text-slate-300">
+                  Full Name
+                </label>
+                <input
+                  id="signup-name"
+                  type="text"
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  placeholder="Your full name"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-slate-300">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="signup-password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    placeholder="At least 6 characters"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-semibold text-slate-300">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="signup-confirm"
+                    type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    placeholder="Confirm your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="mt-2 w-full rounded-xl bg-white py-3 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-slate-100 disabled:opacity-60"
+              >
+                {sendingCode ? "Sending code…" : "Send verification code"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-slate-400">
+                We sent a 6-digit code to <strong className="text-slate-300">{phone}</strong>. Enter it below.
+              </p>
+              <div>
+                <label htmlFor="signup-otp" className="mb-1.5 block text-sm font-semibold text-slate-300">
+                  Verification code
+                </label>
+                <input
+                  id="signup-otp"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-lg tracking-widest text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  placeholder="000000"
+                  required
+                />
+              </div>
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                onClick={() => setStep(1)}
+                className="w-full text-sm text-slate-400 hover:text-white"
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                Use a different number
               </button>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-semibold text-slate-300">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                id="signup-confirm"
-                type={showConfirmPassword ? "text" : "password"}
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                placeholder="Confirm your password"
-                required
-              />
               <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                type="submit"
+                disabled={isLoading || otpCode.length !== 6}
+                className="mt-2 w-full rounded-xl bg-white py-3 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-slate-100 disabled:opacity-60"
               >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {submitting ? "Creating account…" : "Verify & sign up"}
               </button>
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="mt-2 w-full rounded-xl bg-white py-3 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-slate-100 disabled:opacity-60"
-          >
-            {submitting ? "Creating account…" : "Sign up"}
-          </button>
+            </>
+          )}
         </form>
 
         {googleClientId && (
@@ -213,11 +289,26 @@ export default function SignupPage() {
 
         <p className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-primary-400 hover:text-primary-300">
+          <Link
+            href={redirect !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
+            className="font-semibold text-primary-400 hover:text-primary-300"
+          >
             Sign in
           </Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }

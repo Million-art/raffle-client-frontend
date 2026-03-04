@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
 import { getRaffles } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
+import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
 import { Loader2, ArrowRight } from "lucide-react";
 
 export function LiveRafflesSection() {
@@ -11,12 +12,19 @@ export function LiveRafflesSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    getRaffles({ page: 1, limit: 6 })
+  const loadRaffles = useCallback(() => {
+    setLoading(true);
+    getRaffles({ page: 1, limit: 6, liveOnly: true })
       .then((r) => setItems(r.items))
       .catch(() => setError("Could not load raffles"))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadRaffles();
+  }, [loadRaffles]);
+
+  useRaffleListUpdates(loadRaffles);
 
   if (loading) {
     return (
@@ -78,12 +86,16 @@ export function LiveRafflesSection() {
         {items.length === 0 ? (
           <div className="rounded-[3rem] border border-white/5 bg-white/[0.02] p-24 text-center backdrop-blur-md">
             <h3 className="text-2xl font-black text-white mb-4 italic">The nodes are silent.</h3>
-            <p className="text-slate-500 font-medium max-w-md mx-auto italic">No active draws found on the platform. Join our waitlist to be notified of the next high-value release.</p>
+            <p className="text-slate-500 font-medium max-w-md mx-auto italic">No active draws found on the platform.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((raffle) => (
-              <RaffleCard key={raffle.id} raffle={raffle} detailHref={`/raffles/${raffle.id}`} />
+              <RaffleCard
+                key={raffle.id}
+                raffle={raffle}
+                detailHref={`/raffles/${raffle.id}`}
+              />
             ))}
           </div>
         )}

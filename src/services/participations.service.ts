@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 export interface Participation {
   raffleId: string;
@@ -10,6 +10,7 @@ export interface Participation {
   myTickets: number;
   status: string;
   imageUrl?: string;
+  videoUrl?: string;
   agentName?: string;
 }
 
@@ -18,6 +19,6 @@ export interface MyRafflesResponse {
 }
 
 export async function getMyRaffles(): Promise<Participation[]> {
-  const data = await apiFetch<MyRafflesResponse>("/api/me/raffles");
-  return data.raffles;
+  const response = await apiFetch<ApiResponse<MyRafflesResponse>>("/api/me/raffles");
+  return response.data.raffles;
 }

@@ -13,6 +13,7 @@ interface RaffleCardProps {
         ticketPrice: number;
         totalTickets: number;
         ticketsSold: number;
+        status?: string;
         videoUrl?: string;
         imageUrl?: string;
         agentName?: string;
@@ -24,8 +25,9 @@ interface RaffleCardProps {
 
 export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, detailHref }) => {
     const router = useRouter();
+    const sold = raffle.ticketsSold;
     const progress = raffle.totalTickets > 0
-        ? (raffle.ticketsSold / raffle.totalTickets) * 100
+        ? (sold / raffle.totalTickets) * 100
         : 0;
 
     const handleCardClick = () => {
@@ -42,7 +44,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
         <motion.div
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
-            className={`group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 transition-all hover:shadow-2xl hover:shadow-primary-100 ${detailHref ? 'cursor-pointer' : ''}`}
+            className={`group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 transition-all hover:shadow-2xl hover:shadow-primary-100 ${detailHref ? 'cursor-pointer' : ''}`}
             onClick={detailHref ? handleCardClick : undefined}
             onKeyDown={detailHref ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
             role={detailHref ? 'button' : undefined}
@@ -78,7 +80,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
 
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2">
-                    {raffle.ticketsSold >= raffle.totalTickets && raffle.totalTickets > 0 ? (
+                    {sold >= raffle.totalTickets && raffle.totalTickets > 0 ? (
                         <div className="flex items-center gap-1.5 rounded-lg bg-slate-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
                             Sold Out
                         </div>
@@ -129,7 +131,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
                         <div>
                             <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tickets Sold</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-sm font-bold text-slate-900">{raffle.ticketsSold}</span>
+                                <span className="text-sm font-bold text-slate-900">{sold}</span>
                                 <span className="text-xs text-slate-400">/ {raffle.totalTickets}</span>
                             </div>
                         </div>
@@ -157,7 +159,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
                                 <span className="text-sm font-bold text-slate-400"> ETB</span>
                             </div>
                         </div>
-                        {raffle.ticketsSold >= raffle.totalTickets && raffle.totalTickets > 0 ? (
+                        {sold >= raffle.totalTickets && raffle.totalTickets > 0 ? (
                             <div className="flex items-center justify-center gap-2 rounded-xl bg-slate-400 px-5 py-3 text-xs font-bold text-white cursor-not-allowed">
                                 Sold Out
                             </div>

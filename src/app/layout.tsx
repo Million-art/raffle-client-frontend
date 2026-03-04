@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Providers } from "@/components/providers/Providers";
+import { DrawToastNotification } from "@/components/raffles/DrawToastNotification";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +21,8 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           {children}
+          <Toaster position="top-right" richColors />
+          <DrawToastNotification />
           <footer className="border-t border-white/5 bg-slate-950 py-12">
             <div className="container mx-auto max-w-7xl px-4 text-center text-sm text-slate-500">
               © {new Date().getFullYear()} RaffleHub. Built for Transparency.
@@ -29,3 +33,4 @@ export default function RootLayout({
     </html>
   );
 }
+
