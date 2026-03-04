@@ -31,8 +31,8 @@ jobs:
       - name: Build and push Client UI
         uses: docker/build-push-action@v5
         with:
-          context: ./client-frontend
-          file: ./client-frontend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.DOCKER_TAG }}
