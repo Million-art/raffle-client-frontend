@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: millionmulugeta/raffle-client-ui
+  IMAGE_NAME: millionmulugeta/carramarket-cf
   DOCKER_TAG: ${{ github.sha }}
 
 jobs:
@@ -48,7 +48,7 @@ jobs:
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: ubuntu
+          username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
