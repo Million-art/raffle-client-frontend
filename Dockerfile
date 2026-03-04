@@ -3,8 +3,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-ARG NEXT_PUBLIC_API_URL=http://localhost:8081
-ARG NEXT_PUBLIC_WS_URL=ws://localhost:5000/ws
+ARG NEXT_PUBLIC_API_URL=http://clientbackend.carramarket.com
+ARG NEXT_PUBLIC_WS_URL=ws://adminbackend.carramarket.com/ws
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 RUN npm run build
