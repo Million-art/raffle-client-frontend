@@ -52,13 +52,7 @@ class WebSocketClient {
                     this.reconnectAttempts = 0;
                     console.log('[WebSocket] Connected');
 
-                    // 1. Authenticate immediately if token exists
-                    const token = localStorage.getItem('token');
-                    if (token) {
-                        this.authenticate(token);
-                    }
-
-                    // 2. Resubscribe to all raffles
+                    // 1. Resubscribe to all raffles
                     this.subscriptions.forEach(raffleId => {
                         this.send({
                             type: 'subscribe',

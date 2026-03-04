@@ -170,13 +170,13 @@ export async function purchaseTickets(
   transactionId?: string,
   participantName?: string,
   participantEmail?: string
-): Promise<{ raffle_id: string; participant_id: string; quantity: number }> {
+): Promise<{ raffle_id: string; participant_id: string; quantity: number; checkout_url?: string }> {
   const body: { quantity: number; transaction_id?: string; participant_name?: string; participant_email?: string } = { quantity };
   if (transactionId) body.transaction_id = transactionId;
   if (participantName) body.participant_name = participantName;
   if (participantEmail) body.participant_email = participantEmail;
 
-  const response = await apiFetch<ApiResponse<{ raffle_id: string; participant_id: string; quantity: number }>>(
+  const response = await apiFetch<ApiResponse<{ raffle_id: string; participant_id: string; quantity: number; checkout_url?: string }>>(
     `/api/raffles/${raffleId}/purchase`, {
     method: "POST",
     body: JSON.stringify(body),

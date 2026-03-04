@@ -91,10 +91,15 @@ export default function RaffleDetailPage() {
     setJoinLoading(true);
     setFlash(null);
     try {
-      await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email);
-      setFlash({ type: "success", text: `You joined with ${joinQuantity} ticket(s).` });
-      setJoinModalOpen(false);
-      loadRaffle();
+      const data = await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email);
+      if (data.checkout_url) {
+        setFlash({ type: "success", text: "Redirecting to payment..." });
+        window.location.href = data.checkout_url;
+      } else {
+        setFlash({ type: "success", text: `You joined with ${joinQuantity} ticket(s).` });
+        setJoinModalOpen(false);
+        loadRaffle();
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to join raffle";
       setFlash({ type: "error", text: msg });
@@ -102,6 +107,15 @@ export default function RaffleDetailPage() {
       setJoinLoading(false);
     }
   }, [raffle, joinQuantity, loadRaffle, user]);
+
+  useEffect(() => {
+    const payment = searchParams?.get("payment");
+    if (payment === "success") {
+      setFlash({ type: "success", text: "Payment received! Your tickets are being issued." });
+    } else if (payment === "failed") {
+      setFlash({ type: "error", text: "Payment failed or was cancelled." });
+    }
+  }, [searchParams]);
 
   if (loading) {
     return (
