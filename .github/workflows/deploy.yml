@@ -82,10 +82,8 @@ jobs:
             echo "[3/8] Pruning unused images and build cache..."
             sudo docker image prune -af 2>/dev/null || true
 
-            echo "[4/8] Starting new client-ui container..."
-            export CLIENT_UI_IMAGE="${IMAGE}"
-            export CLIENT_UI_TAG="${NEW_TAG}"
-            sudo docker compose -f docker-compose.yml up -d --no-deps $CONTAINER_NAME
+            echo "[4/8] Starting new client-frontend container..."
+            sudo CLIENT_UI_TAG="${NEW_TAG}" docker compose -f docker-compose.yml up -d --no-deps $CONTAINER_NAME
 
             echo "[5/8] Waiting for container to start..."
             sleep 10
