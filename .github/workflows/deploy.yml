@@ -11,6 +11,9 @@ on:
 env:
   IMAGE_NAME: millionmulugeta/carramarket-cf
   DOCKER_TAG: ${{ github.sha }}
+  NEXT_PUBLIC_API_URL: https://clientbackend.carramarket.com
+  NEXT_PUBLIC_WS_URL: wss://clientbackend.carramarket.com/ws
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: 989459413354-53c1tq137ihi9seo4mopk0as33et8j76.apps.googleusercontent.com
 
 jobs:
   build-and-push:
@@ -37,6 +40,10 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.DOCKER_TAG }}
             ${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_WS_URL=${{ env.NEXT_PUBLIC_WS_URL }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ env.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
           no-cache: true
           pull: true
 
