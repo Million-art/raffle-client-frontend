@@ -13,9 +13,7 @@ env:
   DOCKER_TAG: ${{ github.sha }}
   NEXT_PUBLIC_API_URL: https://clientbackend.carramarket.com
   NEXT_PUBLIC_WS_URL: wss://clientbackend.carramarket.com/ws
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID: 989459413354-53c1tq137ihi9seo4mopk0as33et8j76.apps.googleusercontent.com
-
-jobs:
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: 510278494876-bkmbkv9hfuelp0a5pv8lcqpd32ondgst.apps.googleusercontent.com
   build-and-push:
     runs-on: ubuntu-latest
     steps:
