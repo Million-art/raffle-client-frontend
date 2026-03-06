@@ -8,6 +8,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "RaffleHub | Transparent & Verified Participation",
   description: "Join the most accountable and fair raffle platform. Verified draws, instant winnings.",
+  icons: {
+    icon: "/carramarket.svg",
+  },
 };
 
 export default function RootLayout({
