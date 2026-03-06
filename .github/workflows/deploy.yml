@@ -4,8 +4,11 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'client-frontend/**'
+      - 'src/**'
+      - 'public/**'
       - '.github/workflows/deploy.yml'
+      - 'package.json'
+      - 'Dockerfile'
   workflow_dispatch:
 
 env:
