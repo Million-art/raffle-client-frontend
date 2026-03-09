@@ -13,6 +13,10 @@
     --color-primary-700: #1d4ed8;
     --color-primary-800: #1e40af;
     --color-primary-900: #1e3a8a;
+    
+    /* Brand Colors */
+    --brand-blue: #2D9FF6;
+    --brand-yellow: #FFF307;
 
     /* Success/Validation - Accuracy and Win */
     --color-success-50: #f0fdf4;

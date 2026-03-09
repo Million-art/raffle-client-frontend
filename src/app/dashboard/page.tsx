@@ -2,16 +2,19 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Ticket, User, Loader2 } from "lucide-react";
+import { Calendar, Ticket, User, Loader2, Trophy, Clock, CheckCircle2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { getMyRaffles } from "@/services/participations.service";
 import type { Participation } from "@/services/participations.service";
 import { useRaffleWebSocketMulti } from "@/hooks/useRaffleWebSocketMulti";
+import { useAuth } from "@/contexts/AuthContext";
 
 function DashboardContent() {
+  const { user } = useAuth();
   const [raffles, setRaffles] = useState<Participation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "active" | "completed" | "won">("all");
 
   const raffleIds = useMemo(() => (raffles ?? []).map((r) => r.raffleId), [raffles]);
   const { getState } = useRaffleWebSocketMulti(raffleIds);
@@ -30,6 +33,23 @@ function DashboardContent() {
       });
     return () => { cancelled = true; };
   }, []);
+
+  const stats = useMemo(() => {
+    return {
+      total: raffles.length,
+      active: raffles.filter(r => r.status === 'active').length,
+      completed: raffles.filter(r => r.status === 'executed').length,
+      won: raffles.filter(r => r.status === 'executed' && r.winnerId === user?.id).length,
+    };
+  }, [raffles, user]);
+
+  const filteredRaffles = useMemo(() => {
+    if (filter === "all") return raffles;
+    if (filter === "active") return raffles.filter(r => r.status === 'active');
+    if (filter === "completed") return raffles.filter(r => r.status === 'executed');
+    if (filter === "won") return raffles.filter(r => r.status === 'executed' && r.winnerId === user?.id);
+    return raffles;
+  }, [raffles, filter, user]);
 
   if (loading) {
     return (
@@ -70,8 +90,45 @@ function DashboardContent() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {raffles.map((r, i) => {
+    <div className="space-y-10">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { icon: <Ticket className="text-blue-400" />, label: "Total Joined", value: stats.total },
+          { icon: <Clock className="text-amber-400" />, label: "Active draws", value: stats.active },
+          { icon: <CheckCircle2 className="text-emerald-400" />, label: "Completed", value: stats.completed },
+          { icon: <Trophy className="text-amber-500" />, label: "Wins", value: stats.won },
+        ].map((stat, i) => (
+          <div key={i} className="p-4 rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-md">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-xl bg-white/5">{stat.icon}</div>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{stat.label}</span>
+            </div>
+            <p className="text-3xl font-black text-white">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10 w-fit">
+        {[
+          { id: "all", label: "All Raffles" },
+          { id: "active", label: "Active Only" },
+          { id: "completed", label: "Completed" },
+          { id: "won", label: "Won" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setFilter(tab.id as any)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${filter === tab.id ? "bg-white text-slate-950 shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredRaffles.map((r, i) => {
         const drawState = getState(r.raffleId);
         const isInDraw = drawState.countdown !== null || drawState.isDrawing;
         const sold = drawState.ticketsSold ?? r.ticketsSold;
@@ -179,6 +236,7 @@ function DashboardContent() {
           </motion.article>
         );
       })}
+      </div>
     </div>
   );
 }

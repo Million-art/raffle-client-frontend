@@ -44,7 +44,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
         <motion.div
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
-            className={`group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 transition-all hover:shadow-2xl hover:shadow-primary-100 ${detailHref ? 'cursor-pointer' : ''}`}
+            className={`group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 transition-all hover:shadow-2xl hover:shadow-brand-blue/10 ${detailHref ? 'cursor-pointer' : ''}`}
             onClick={detailHref ? handleCardClick : undefined}
             onKeyDown={detailHref ? (e) => e.key === 'Enter' && handleCardClick() : undefined}
             role={detailHref ? 'button' : undefined}
@@ -103,7 +103,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
             <div className="flex flex-1 flex-col p-6">
                 {/* Agent Meta */}
                 <div className="mb-3 flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-blue/10 text-brand-blue">
                         <User className="h-3.5 w-3.5" />
                     </div>
                     <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
@@ -137,7 +137,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
                         </div>
                         <div className="text-right">
                             <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Goal</span>
-                            <span className="text-sm font-bold text-primary-600">{Math.round(progress)}%</span>
+                            <span className="text-sm font-bold text-brand-blue">{Math.round(progress)}%</span>
                         </div>
                     </div>
 
@@ -146,7 +146,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}
-                            className="h-full bg-gradient-to-r from-primary-600 to-primary-400"
+                            className="h-full bg-brand-blue"
                         />
                     </div>
 
@@ -167,7 +167,7 @@ export const RaffleCard: React.FC<RaffleCardProps> = ({ raffle, onJoinClick, det
                             <button
                                 type="button"
                                 onClick={handleJoinClick}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-xs font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200 active:scale-95"
+                                className="flex items-center justify-center gap-2 rounded-xl bg-brand-blue px-5 py-3 text-xs font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg hover:shadow-brand-blue/20 active:scale-95"
                             >
                                 <span>JOIN DRAW</span>
                                 <ArrowRight className="h-4 w-4" />
