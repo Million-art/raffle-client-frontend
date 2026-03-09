@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendOtp, verifyOtp } from "@/services/auth.service";
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 
 /**
@@ -131,12 +132,10 @@ function SignupForm() {
     <main className="flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
         <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg">
-            <Shield className="h-6 w-6" />
-          </div>
+          <Image src="/logo.png" alt="Logo" width={140} height={48} className="h-12 w-auto object-contain mb-4" />
           <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
           <p className="mt-2 text-center text-sm text-slate-600">
-            Join RaffleHub and start participating in exciting raffles
+            Join and start participating in exciting raffles
           </p>
         </div>
 

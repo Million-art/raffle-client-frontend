@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Shield,
   LogIn,
   LayoutDashboard,
   LogOut,
@@ -33,14 +33,8 @@ export const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-blue text-white">
-            <Shield className="h-5 w-5" />
-          </div>
-
-          <span className="text-lg font-bold text-gray-900">
-            Raffle<span className="text-brand-blue">Hub</span>
-          </span>
+        <Link href="/" className="flex items-center">
+          <Image src="/logo.png" alt="Logo" width={120} height={40} className="h-10 w-auto object-contain" priority />
         </Link>
 
         {/* Desktop Menu */}
