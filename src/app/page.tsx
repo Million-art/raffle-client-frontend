@@ -11,26 +11,15 @@ import { CTASection } from "@/components/home/CTASection";
 import { getRaffles } from "@/services/raffles.service";
 
 export default async function Home() {
-    const raffles = await getRaffles({ limit: 1, liveOnly: true }).catch(() => null);
-    const featuredApi = raffles?.items?.[0];
-
-    const featuredRaffle = featuredApi ? {
-        id: featuredApi.id,
-        title: featuredApi.name,
-        description: featuredApi.description,
-        image: featuredApi.imageUrl || "/images/device.png",
-        ticketPrice: featuredApi.ticketPrice,
-        totalTickets: featuredApi.totalTickets,
-        soldTickets: featuredApi.ticketsSold,
-        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Feature raffles don't currently have endDate in list API
-    } : null;
+    const raffles = await getRaffles({ limit: 3, liveOnly: true }).catch(() => null);
+    const featuredRaffles = raffles?.items ?? [];
 
     return (
         <div className="flex min-h-screen flex-col w-full">
             <HeroSection />
             <StatsSection />
             <LiveRafflesSection />
-            {featuredRaffle && <FeaturedRaffleSection raffle={featuredRaffle} />}
+            {featuredRaffles.length > 0 && <FeaturedRaffleSection raffles={featuredRaffles} />}
             <HowItWorksSection />
             <BecomeAgentSection />
             <WinnersSection />
