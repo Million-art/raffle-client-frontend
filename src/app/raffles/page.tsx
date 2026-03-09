@@ -76,7 +76,7 @@ export default function RafflesPage() {
   }, [joinLoading]);
 
   return (
-    <main className="min-h-screen border-t border-white/5 bg-slate-950 pt-8 pb-24 relative overflow-hidden">
+    <main className="min-h-screen border-t border-slate-200 bg-slate-50 pt-8 pb-24 relative overflow-hidden">
       {/* Subtle background glow */}
       <div className="absolute top-0 right-0 h-[500px] w-[500px] bg-primary-600/5 blur-[120px] pointer-events-none" />
       <div className="container relative z-10 mx-auto max-w-7xl px-4">
@@ -104,10 +104,10 @@ export default function RafflesPage() {
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Live Infrastructure</span>
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white">
+            <h1 className="text-4xl font-black tracking-tight text-slate-900">
               Explore Raffles
             </h1>
-            <p className="mt-2 font-medium text-slate-400">
+            <p className="mt-2 font-medium text-slate-600">
               Browse through verified opportunities and find your next win.
             </p>
           </div>
@@ -121,15 +121,15 @@ export default function RafflesPage() {
             </div>
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-red-400 backdrop-blur-md">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-600 backdrop-blur-md">
             <p className="font-semibold">{error}</p>
             <p className="mt-1 text-sm opacity-90">
               Make sure the client backend and admin backend are running.
             </p>
           </div>
         ) : items.length === 0 ? (
-          <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-24 text-center backdrop-blur-md">
-            <h3 className="text-2xl font-black text-white mb-4 italic">The nodes are silent.</h3>
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-24 text-center shadow-sm">
+            <h3 className="text-2xl font-black text-slate-900 mb-4 italic">The nodes are silent.</h3>
             <p className="text-slate-500 font-medium max-w-md mx-auto italic">No raffles available. Check back later.</p>
           </div>
         ) : (
@@ -151,18 +151,18 @@ export default function RafflesPage() {
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-white/10"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50 hover:bg-slate-100"
                 >
                   Previous
                 </button>
-                <span className="text-sm text-slate-400">
+                <span className="text-sm text-slate-500">
                   Page {page} of {Math.ceil(total / limit)}
                 </span>
                 <button
                   type="button"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= Math.ceil(total / limit)}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-white/10"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50 hover:bg-slate-100"
                 >
                   Next
                 </button>
@@ -170,7 +170,7 @@ export default function RafflesPage() {
             )}
 
             <div className="mt-24 flex flex-col items-center text-center opacity-60">
-              <div className="mb-4 h-px w-24 bg-white/10" />
+              <div className="mb-4 h-px w-24 bg-slate-300" />
               <p className="text-sm font-bold uppercase tracking-widest text-slate-500">
                 More Raffles Incoming Daily
               </p>
@@ -182,33 +182,33 @@ export default function RafflesPage() {
       {/* Join Raffle modal */}
       {joinRaffle && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
           onClick={handleJoinClose}
           role="dialog"
           aria-modal="true"
           aria-labelledby="join-raffle-title"
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-md"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 id="join-raffle-title" className="text-lg font-bold text-white">
+              <h2 id="join-raffle-title" className="text-lg font-bold text-slate-900">
                 Join raffle
               </h2>
               <button
                 type="button"
                 onClick={handleJoinClose}
                 disabled={joinLoading}
-                className="rounded-lg p-1 text-slate-500 hover:bg-white/10 hover:text-white disabled:opacity-50"
+                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="mb-4 text-sm text-slate-400">{joinRaffle.name}</p>
+            <p className="mb-4 text-sm text-slate-600">{joinRaffle.name}</p>
             <div className="mb-4">
-              <label htmlFor="join-quantity" className="mb-1 block text-sm font-semibold text-slate-300">
+              <label htmlFor="join-quantity" className="mb-1 block text-sm font-semibold text-slate-700">
                 Number of tickets
               </label>
               <input
@@ -218,7 +218,7 @@ export default function RafflesPage() {
                 max={Math.max(1, joinRaffle.totalTickets - joinRaffle.ticketsSold)}
                 value={joinQuantity}
                 onChange={(e) => setJoinQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20"
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-slate-900 outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20"
               />
               <p className="mt-1 text-xs text-slate-500">
                 {(joinRaffle.ticketPrice * joinQuantity).toFixed(0)} ETB total
@@ -229,7 +229,7 @@ export default function RafflesPage() {
                 type="button"
                 onClick={handleJoinClose}
                 disabled={joinLoading}
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -237,7 +237,7 @@ export default function RafflesPage() {
                 type="button"
                 onClick={handleJoinConfirm}
                 disabled={joinLoading}
-                className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-slate-100 disabled:opacity-50"
+                className="flex-1 rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50"
               >
                 {joinLoading ? "Joining…" : "Join"}
               </button>

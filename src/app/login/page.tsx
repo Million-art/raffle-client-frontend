@@ -37,10 +37,10 @@ function GoogleLoginSection() {
     <>
       <div className="mt-8 relative">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-white/10"></div>
+          <div className="w-full border-t border-slate-200"></div>
         </div>
         <div className="relative flex justify-center text-sm font-medium">
-          <span className="bg-slate-900/80 px-4 text-slate-500">or continue with</span>
+          <span className="bg-white px-4 text-slate-500">or continue with</span>
         </div>
       </div>
 
@@ -106,26 +106,26 @@ function LoginForm() {
 
   return (
     <main className="flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-8 shadow-2xl backdrop-blur-md">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
         <div className="mb-8 flex flex-col items-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 text-white shadow-lg">
             <Shield className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Sign in to RaffleHub</h1>
-          <p className="mt-2 text-center text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-slate-900">Sign in to RaffleHub</h1>
+          <p className="mt-2 text-center text-sm text-slate-600">
             Access your tickets and winnings.
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-slate-300">
+            <label className="mb-1.5 block text-sm font-semibold text-slate-700">
               Email or Phone Number
             </label>
             <input
@@ -133,13 +133,13 @@ function LoginForm() {
               required
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               placeholder="Enter your email or phone"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-slate-300">
+            <label className="mb-1.5 block text-sm font-semibold text-slate-700">
               Password
             </label>
             <div className="relative">
@@ -148,13 +148,13 @@ function LoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-primary-500/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -164,7 +164,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-2 w-full rounded-xl bg-white py-3 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-slate-100 disabled:opacity-60"
+            className="mt-2 w-full rounded-xl bg-primary-600 py-3 text-sm font-bold text-white shadow-md transition hover:bg-primary-500 disabled:opacity-60"
           >
             {submitting ? "Signing in…" : "Sign in"}
           </button>
@@ -174,11 +174,11 @@ function LoginForm() {
           <GoogleLoginSection />
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-slate-600">
           Don&apos;t have an account?{" "}
           <Link
             href={redirect !== "/dashboard" ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"}
-            className="font-semibold text-primary-400 hover:text-primary-300"
+            className="font-semibold text-primary-600 hover:text-primary-700"
           >
             Sign up
           </Link>

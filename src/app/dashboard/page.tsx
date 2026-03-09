@@ -56,7 +56,7 @@ function DashboardContent() {
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-primary-500/20 blur-xl animate-pulse" />
-          <Loader2 className="h-10 w-10 animate-spin text-primary-500 relative" />
+          <Loader2 className="h-10 w-10 animate-spin text-primary-600 relative" />
         </div>
       </div>
     );
@@ -64,7 +64,7 @@ function DashboardContent() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-red-400 backdrop-blur-md">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-600 shadow-sm">
         <p className="font-semibold">Could not load your raffles</p>
         <p className="mt-1 text-sm opacity-90">{error}</p>
       </div>
@@ -73,15 +73,15 @@ function DashboardContent() {
 
   if (!raffles || raffles.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-12 text-center backdrop-blur-md">
-        <Ticket className="mx-auto h-14 w-14 text-slate-500" />
-        <h2 className="mt-4 text-xl font-bold text-white">No participations yet</h2>
-        <p className="mt-2 text-slate-400">
+      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+        <Ticket className="mx-auto h-14 w-14 text-slate-400" />
+        <h2 className="mt-4 text-xl font-bold text-slate-900">No participations yet</h2>
+        <p className="mt-2 text-slate-500">
           When you join raffles, they will appear here.
         </p>
         <a
           href="/raffles"
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-slate-950 shadow-soft transition-all hover:bg-slate-100"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-soft transition-all hover:bg-primary-500"
         >
           Explore raffles
         </a>
@@ -99,18 +99,18 @@ function DashboardContent() {
           { icon: <CheckCircle2 className="text-emerald-400" />, label: "Completed", value: stats.completed },
           { icon: <Trophy className="text-amber-500" />, label: "Wins", value: stats.won },
         ].map((stat, i) => (
-          <div key={i} className="p-4 rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-md">
+          <div key={i} className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-xl bg-white/5">{stat.icon}</div>
+              <div className="p-2 rounded-xl bg-slate-50">{stat.icon}</div>
               <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{stat.label}</span>
             </div>
-            <p className="text-3xl font-black text-white">{stat.value}</p>
+            <p className="text-3xl font-black text-slate-900">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10 w-fit">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-slate-200 w-fit shadow-sm">
         {[
           { id: "all", label: "All Raffles" },
           { id: "active", label: "Active Only" },
@@ -120,7 +120,7 @@ function DashboardContent() {
           <button
             key={tab.id}
             onClick={() => setFilter(tab.id as any)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${filter === tab.id ? "bg-white text-slate-950 shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${filter === tab.id ? "bg-primary-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}
           >
             {tab.label}
           </button>
@@ -138,7 +138,7 @@ function DashboardContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 shadow-xl transition-all hover:border-primary-500/30 hover:shadow-2xl backdrop-blur-md"
+            className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
           >
             {/* Draw in progress overlay - spinner for all participants in realtime */}
             {isInDraw && (
@@ -205,20 +205,20 @@ function DashboardContent() {
             </div>
 
             <div className="flex flex-col p-6">
-              <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                <User className="h-3 w-3 text-primary-400" />
+              <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                <User className="h-3 w-3 text-primary-600" />
                 {r.agentName || "Verified Agent"}
               </div>
 
-              <h3 className="mb-2 text-xl font-bold text-white line-clamp-1">{r.raffleName}</h3>
-              <p className="mb-6 text-sm text-slate-400 line-clamp-2 leading-relaxed">{r.description}</p>
+              <h3 className="mb-2 text-xl font-bold text-slate-900 line-clamp-1">{r.raffleName}</h3>
+              <p className="mb-6 text-sm text-slate-600 line-clamp-2 leading-relaxed">{r.description}</p>
 
               <div className="mb-6 space-y-2">
-                <div className="flex justify-between text-xs font-bold text-slate-300">
+                <div className="flex justify-between text-xs font-bold text-slate-700">
                   <span>{sold} sold</span>
                   <span>{r.totalTickets} total</span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(sold / r.totalTickets) * 100}%` }}
@@ -228,9 +228,9 @@ function DashboardContent() {
                 </div>
               </div>
 
-              <div className="mt-auto border-t border-white/10 pt-4">
+              <div className="mt-auto border-t border-slate-200 pt-4">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Price / ticket</p>
-                <p className="text-xl font-black text-white">{r.ticketPrice.toFixed(0)} ETB</p>
+                <p className="text-xl font-black text-slate-900">{r.ticketPrice.toFixed(0)} ETB</p>
               </div>
             </div>
           </motion.article>
@@ -244,10 +244,10 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <main className="min-h-screen border-t border-white/5 bg-slate-950 pt-8 pb-24">
+      <main className="min-h-screen border-t border-slate-200 bg-slate-50 pt-8 pb-24">
         <div className="container mx-auto max-w-7xl px-4">
-          <h1 className="text-4xl font-black tracking-tight text-white">My dashboard</h1>
-          <p className="mt-2 text-slate-400 font-medium">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900">My dashboard</h1>
+          <p className="mt-2 text-slate-600 font-medium">
             Raffles you participated in and your ticket counts.
           </p>
           <div className="mt-10">
