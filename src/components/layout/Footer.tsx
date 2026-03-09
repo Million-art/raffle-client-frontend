@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -7,9 +8,9 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-10">
 
         <div>
-          <h3 className="font-bold text-lg mb-3">
-            RaffleHub
-          </h3>
+          <Link href="/">
+            <Image src="/logo.png" alt="Logo" width={120} height={40} className="h-10 w-auto object-contain mb-3" />
+          </Link>
           <p className="text-sm text-slate-600">
             The trusted platform for secure online raffles.
           </p>
@@ -44,7 +45,7 @@ export function Footer() {
       </div>
 
       <div className="text-center text-xs text-slate-500 mt-12">
-        © {new Date().getFullYear()} RaffleHub. All rights reserved.
+        © {new Date().getFullYear()} All rights reserved.
       </div>
 
     </footer>
