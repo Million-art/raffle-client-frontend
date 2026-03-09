@@ -122,7 +122,7 @@ export default function RaffleDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-950 pt-8 pb-24 flex items-center justify-center">
+      <main className="min-h-screen bg-slate-50 pt-8 pb-24 flex items-center justify-center">
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-primary-500/20 blur-xl animate-pulse" />
           <Loader2 className="h-10 w-10 animate-spin text-primary-500 relative" />
@@ -133,10 +133,10 @@ export default function RaffleDetailPage() {
 
   if (error || !raffle) {
     return (
-      <main className="min-h-screen bg-slate-950 pt-8 pb-24">
+      <main className="min-h-screen bg-slate-50 pt-8 pb-24">
         <div className="container mx-auto max-w-3xl px-4">
-          <p className="text-red-400 font-medium">{error ?? "Raffle not found."}</p>
-          <Link href={backHref} className="mt-4 inline-flex items-center gap-2 text-primary-400 font-semibold hover:text-primary-300">
+          <p className="text-red-600 font-medium">{error ?? "Raffle not found."}</p>
+          <Link href={backHref} className="mt-4 inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700">
             <ArrowLeft className="h-4 w-4" /> {backLabel}
           </Link>
         </div>
@@ -147,11 +147,11 @@ export default function RaffleDetailPage() {
   const progress = raffle.totalTickets > 0 ? (raffle.ticketsSold / raffle.totalTickets) * 100 : 0;
 
   return (
-    <main className="min-h-screen border-t border-white/5 bg-slate-950 pt-8 pb-24">
+    <main className="min-h-screen border-t border-slate-200 bg-slate-50 pt-8 pb-24">
       <div className="container mx-auto max-w-4xl px-4">
         <Link
           href={backHref}
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-white font-medium mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> {backLabel}
         </Link>
@@ -159,8 +159,8 @@ export default function RaffleDetailPage() {
         {flash && (
           <div
             className={`mb-6 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${flash.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-              : "border-red-500/20 bg-red-500/10 text-red-400"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+              : "border-red-200 bg-red-50 text-red-600"
               }`}
             role="alert"
           >
@@ -171,42 +171,42 @@ export default function RaffleDetailPage() {
           </div>
         )}
 
-        <article className="rounded-2xl border border-white/10 bg-slate-900/50 shadow-2xl overflow-hidden backdrop-blur-md">
+        <article className="rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
           {/* Product Media - AliExpress style gallery */}
           <div className="p-4 sm:p-6">
             <ProductMediaGallery raffle={raffle} />
           </div>
 
           <div className="p-6 sm:p-8">
-            <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-slate-400">
+            <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-slate-600">
               <span className="flex items-center gap-1.5 font-semibold">
-                <User className="h-4 w-4 text-primary-500" />
+                <User className="h-4 w-4 text-primary-600" />
                 {raffle.agentName ?? "Verified Agent"}
               </span>
               {raffle.startDate && (
                 <span className="flex items-center gap-1.5 font-semibold">
-                  <Calendar className="h-4 w-4 text-primary-500" />
+                  <Calendar className="h-4 w-4 text-primary-600" />
                   Started: {new Date(raffle.startDate).toLocaleDateString("en-US", { dateStyle: "long" })}
                 </span>
               )}
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-4">{raffle.name}</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-4">{raffle.name}</h1>
 
             {/* Full description */}
-            <div className="prose prose-invert max-w-none mb-8">
-              <p className="text-slate-400 whitespace-pre-wrap leading-relaxed">
+            <div className="prose max-w-none mb-8">
+              <p className="text-slate-600 whitespace-pre-wrap leading-relaxed">
                 {raffle.description || "No description provided."}
               </p>
             </div>
 
             {/* Progress */}
             <div className="mb-8 space-y-2">
-              <div className="flex justify-between text-sm font-bold text-slate-300">
+              <div className="flex justify-between text-sm font-bold text-slate-700">
                 <span>{raffle.ticketsSold} sold</span>
                 <span>{raffle.totalTickets} total</span>
               </div>
-              <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-3 w-full rounded-full bg-slate-200 overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 rounded-full ${isDrawing || countdown !== null ? 'bg-orange-500 animate-pulse' : 'bg-primary-600'
                     }`}
@@ -241,8 +241,8 @@ export default function RaffleDetailPage() {
 
             {/* Executed result - inline (startRevealed = no shake, overlay takes precedence when open) */}
             {raffle.status === 'executed' && (raffle.winnerName || wsWinnerName) && (
-              <div className="mb-8 rounded-2xl bg-slate-900 p-6 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
+              <div className="mb-8 rounded-2xl bg-white border border-slate-200 p-6 text-slate-900 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100 blur-3xl rounded-full -mr-16 -mt-16" />
                 {wheelData ? (
                   <DrawContainerReveal
                     segments={wheelData.segments}
@@ -254,24 +254,24 @@ export default function RaffleDetailPage() {
                   />
                 ) : (
                   <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="bg-primary-500/20 text-primary-400 p-3 rounded-full mb-2">
+                    <div className="bg-primary-50 text-primary-600 p-3 rounded-full mb-2">
                       <User className="h-8 w-8" />
                     </div>
                     <div>
-                      <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Winner</h2>
-                      <p className="text-2xl font-black text-white break-all">
+                      <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-1">Winner</h2>
+                      <p className="text-2xl font-black text-slate-900 break-all">
                         {raffle.winnerName || "Winner"}
                       </p>
                       <div className="mt-2 space-y-1">
                         {raffle.winnerEmail && (
-                          <p className="text-sm text-slate-400 font-medium">{raffle.winnerEmail}</p>
+                          <p className="text-sm text-slate-600 font-medium">{raffle.winnerEmail}</p>
                         )}
                         {raffle.winnerPhone && (
-                          <p className="text-sm text-slate-400 font-medium">{raffle.winnerPhone}</p>
+                          <p className="text-sm text-slate-600 font-medium">{raffle.winnerPhone}</p>
                         )}
                       </div>
                     </div>
-                    <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-sm font-bold border border-green-500/30">
+                    <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-1.5 rounded-full text-sm font-bold border border-green-200">
                       Raffle Completed
                     </div>
                   </div>
@@ -280,16 +280,16 @@ export default function RaffleDetailPage() {
             )}
 
             {/* Price & CTA */}
-            <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-white/10 ${raffle.status !== 'approved' ? 'opacity-50 grayscale' : ''}`}>
+            <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-slate-200 ${raffle.status !== 'approved' ? 'opacity-50 grayscale' : ''}`}>
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Price per ticket</p>
-                <p className="text-2xl font-black text-white">{raffle.ticketPrice.toFixed(0)} ETB</p>
+                <p className="text-2xl font-black text-slate-900">{raffle.ticketPrice.toFixed(0)} ETB</p>
               </div>
               <button
                 type="button"
                 onClick={handleJoinClick}
                 disabled={raffle.status !== 'approved'}
-                className="rounded-xl bg-white px-6 py-3 text-base font-bold text-slate-950 hover:bg-slate-100 transition-colors disabled:cursor-not-allowed"
+                className="rounded-xl bg-brand-blue px-6 py-3 text-base font-bold text-white hover:bg-blue-600 transition-colors disabled:cursor-not-allowed"
               >
                 {raffle.status === 'approved' ? 'Join this raffle' : 'Sold Out / Closed'}
               </button>
@@ -305,17 +305,17 @@ export default function RaffleDetailPage() {
       </div>
 
       {/* Sticky Bottom Bar for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-slate-900/80 backdrop-blur-xl p-4 md:p-6 transition-transform duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-slate-200 bg-white/90 backdrop-blur-xl p-4 md:p-6 transition-transform duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div className="container mx-auto flex items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Entry Price</p>
-            <p className="text-xl font-black text-white">{raffle.ticketPrice.toFixed(0)} ETB</p>
+            <p className="text-xl font-black text-slate-900">{raffle.ticketPrice.toFixed(0)} ETB</p>
           </div>
           <button
             type="button"
             onClick={handleJoinClick}
             disabled={raffle.status !== 'approved'}
-            className="flex-1 max-w-[200px] flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-slate-950 hover:bg-slate-100 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+            className="flex-1 max-w-[200px] flex items-center justify-center gap-2 rounded-xl bg-brand-blue px-6 py-3.5 text-sm font-bold text-white hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
           >
             <Ticket className="h-4 w-4" />
             <span>JOIN NOW</span>
@@ -326,30 +326,30 @@ export default function RaffleDetailPage() {
       {/* Join modal */}
       {joinModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
           onClick={() => !joinLoading && setJoinModalOpen(false)}
           role="dialog"
           aria-modal="true"
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl backdrop-blur-md"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white">Join raffle</h2>
+              <h2 className="text-lg font-bold text-slate-900">Join raffle</h2>
               <button
                 type="button"
                 onClick={() => !joinLoading && setJoinModalOpen(false)}
                 disabled={joinLoading}
-                className="rounded-lg p-1 text-slate-500 hover:bg-white/10 hover:text-white"
+                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="mb-4 text-sm text-slate-400">{raffle.name}</p>
+            <p className="mb-4 text-sm text-slate-600">{raffle.name}</p>
             <div className="mb-4">
-              <label htmlFor="detail-join-quantity" className="mb-1 block text-sm font-semibold text-slate-300">
+              <label htmlFor="detail-join-quantity" className="mb-1 block text-sm font-semibold text-slate-700">
                 Number of tickets
               </label>
               <input
@@ -359,7 +359,7 @@ export default function RaffleDetailPage() {
                 max={Math.max(1, raffle.totalTickets - raffle.ticketsSold)}
                 value={joinQuantity}
                 onChange={(e) => setJoinQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20"
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-slate-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
               />
               <p className="mt-1 text-xs text-slate-500">
                 {(raffle.ticketPrice * joinQuantity).toFixed(0)} ETB total
@@ -370,7 +370,7 @@ export default function RaffleDetailPage() {
                 type="button"
                 onClick={() => !joinLoading && setJoinModalOpen(false)}
                 disabled={joinLoading}
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -378,7 +378,7 @@ export default function RaffleDetailPage() {
                 type="button"
                 onClick={handleJoinConfirm}
                 disabled={joinLoading}
-                className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-slate-100 disabled:opacity-50"
+                className="flex-1 rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50"
               >
                 {joinLoading ? "Joining…" : "Join"}
               </button>

@@ -35,12 +35,12 @@
     --color-slate-800: #1e293b;
     --color-slate-900: #0f172a;
 
-    /* Semantic Mappings - Dark theme */
-    --background: #020617;
-    --foreground: #f8fafc;
-    --muted: #0f172a;
-    --muted-foreground: #94a3b8;
-    --border: rgba(255, 255, 255, 0.1);
+    /* Semantic Mappings - Light theme */
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --muted: #f8fafc;
+    --muted-foreground: #64748b;
+    --border: #e2e8f0;
     --accent: #2563eb;
 
     /* Layout */
