@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 export const HeroSection = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-brand-blue pt-32 pb-24">
+    <section className="relative w-full overflow-hidden bg-brand-blue min-h-[80vh] pt-32 pb-24 flex items-center">
       
       {/* radial light effect */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.35)_0%,rgba(45,159,246,1)_65%)]" />
