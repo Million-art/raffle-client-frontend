@@ -12,6 +12,7 @@ export interface Participation {
   imageUrl?: string;
   videoUrl?: string;
   agentName?: string;
+  winnerId?: string;
 }
 
 export interface MyRafflesResponse {

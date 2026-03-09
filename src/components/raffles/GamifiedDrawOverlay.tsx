@@ -288,8 +288,8 @@ export function GamifiedDrawOverlay({
                 </div>
               </motion.div>
 
-              <p className="text-xl font-black uppercase tracking-widest text-amber-400 mb-2">
-                🎉 WINNER 🎉
+              <p className="text-xl font-black uppercase tracking-[0.5em] text-amber-500 mb-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">
+                🎉 WINNER REVEALED 🎉
               </p>
 
               <h2
@@ -370,7 +370,7 @@ function ConfettiFX() {
   ];
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-[50]">
-      {[...Array(60)].map((_, i) => (
+      {[...Array(100)].map((_, i) => (
         <motion.div
           key={i}
           initial={{

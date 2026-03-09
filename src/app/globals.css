@@ -8,6 +8,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-primary: var(--color-primary-600);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-yellow: var(--brand-yellow);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);

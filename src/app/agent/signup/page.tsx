@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 const AGENT_SIGNUP_URL =
-  process.env.NEXT_PUBLIC_AGENT_SIGNUP_URL || "http://localhost:5173/agent/signup";
+  process.env.NEXT_PUBLIC_AGENT_SIGNUP_URL || "http://localhost:5173/agents/signup";
 
 export default function AgentSignupRedirect() {
   useEffect(() => {
@@ -12,7 +12,7 @@ export default function AgentSignupRedirect() {
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center">
-      <p className="text-slate-400">Redirecting to agent signup…</p>
+      <p className="text-slate-400">Redirecting…</p>
     </div>
   );
 }

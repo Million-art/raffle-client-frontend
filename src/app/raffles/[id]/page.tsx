@@ -10,7 +10,10 @@ import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
 import { DrawContainerReveal } from "@/components/raffles/DrawContainerReveal";
 import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
-import { ArrowLeft, Calendar, User, Loader2, X } from "lucide-react";
+import { TrustBadges } from "@/components/raffles/TrustBadges";
+import { StepsGuide } from "@/components/raffles/StepsGuide";
+import { WinnerHistory } from "@/components/raffles/WinnerHistory";
+import { ArrowLeft, Calendar, User, Loader2, X, Ticket, ShieldCheck } from "lucide-react";
 
 export default function RaffleDetailPage() {
   const params = useParams();
@@ -213,6 +216,9 @@ export default function RaffleDetailPage() {
               <p className="text-right text-xs font-bold text-primary-600">{Math.round(progress)}% filled</p>
             </div>
 
+            {/* Trust Badges */}
+            <TrustBadges />
+
             {/* Full-screen draw overlay - cannot be closed until draw completes */}
             {/* Gamified Full-Screen Overlay */}
             <GamifiedDrawOverlay
@@ -291,6 +297,30 @@ export default function RaffleDetailPage() {
           </div>
         </article>
 
+        {/* How it works */}
+        <StepsGuide />
+
+        {/* Recent Winners */}
+        <WinnerHistory />
+      </div>
+
+      {/* Sticky Bottom Bar for Mobile */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-slate-900/80 backdrop-blur-xl p-4 md:p-6 transition-transform duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className="container mx-auto flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Entry Price</p>
+            <p className="text-xl font-black text-white">{raffle.ticketPrice.toFixed(0)} ETB</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleJoinClick}
+            disabled={raffle.status !== 'approved'}
+            className="flex-1 max-w-[200px] flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-slate-950 hover:bg-slate-100 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+          >
+            <Ticket className="h-4 w-4" />
+            <span>JOIN NOW</span>
+          </button>
+        </div>
       </div>
 
       {/* Join modal */}

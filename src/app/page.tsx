@@ -1,47 +1,42 @@
 import { HeroSection } from "@/components/home/HeroSection";
+import { StatsSection } from "@/components/home/StatsSection";
 import { LiveRafflesSection } from "@/components/raffles/LiveRafflesSection";
+import { FeaturedRaffleSection } from "@/components/home/FeaturedRaffleSection";
+import { HowItWorksSection } from "@/components/home/HowItWorksSection";
+import { BecomeAgentSection } from "@/components/home/BecomeAgentSection";
 import { WinnersSection } from "@/components/home/WinnersSection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { FAQSection } from "@/components/home/FAQSection";
+import { CTASection } from "@/components/home/CTASection";
+import { getRaffles } from "@/services/raffles.service";
 
-export default function Home() {
+export default async function Home() {
+    const raffles = await getRaffles({ limit: 1, liveOnly: true }).catch(() => null);
+    const featuredApi = raffles?.items?.[0];
+
+    const featuredRaffle = featuredApi ? {
+        id: featuredApi.id,
+        title: featuredApi.name,
+        description: featuredApi.description,
+        image: featuredApi.imageUrl || "/images/device.png",
+        ticketPrice: featuredApi.ticketPrice,
+        totalTickets: featuredApi.totalTickets,
+        soldTickets: featuredApi.ticketsSold,
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Feature raffles don't currently have endDate in list API
+    } : null;
+
     return (
-        <main className="flex min-h-screen flex-col justify-between">
+        <div className="flex min-h-screen flex-col w-full">
             <HeroSection />
-
+            <StatsSection />
             <LiveRafflesSection />
-
+            {featuredRaffle && <FeaturedRaffleSection raffle={featuredRaffle} />}
+            <HowItWorksSection />
+            <BecomeAgentSection />
             <WinnersSection />
-
-            {/* Trust Banner / Social Proof */}
-            <section className="w-full bg-slate-950 py-32 text-white overflow-hidden relative border-t border-white/5">
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-[20%] right-[-10%] h-[500px] w-[500px] rounded-full bg-primary-600/5 blur-[120px]" />
-                    <div className="absolute bottom-[20%] left-[-10%] h-[500px] w-[500px] rounded-full bg-blue-600/5 blur-[120px]" />
-                </div>
-
-                <div className="container mx-auto flex max-w-7xl flex-col items-center px-4 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2 mb-10">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Accountability Protocol</span>
-                    </div>
-                    <h2 className="text-5xl font-black tracking-tight sm:text-7xl text-white leading-tight">Built on the foundation of <span className="text-primary-500 italic">absolute transparency.</span></h2>
-                    <p className="mt-8 max-w-3xl text-xl text-slate-400 leading-relaxed font-medium italic">
-                        "Every ticket sale, every draw, and every payout is logged and publicly auditable. We don't just promise fairness; we prove it with cryptographic accountability."
-                    </p>
-                    <div className="mt-20 flex flex-wrap justify-center gap-12 sm:gap-24">
-                        <div className="flex flex-col items-center">
-                            <span className="text-6xl font-black text-white tracking-tighter">100%</span>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-4 font-black">Verified Nodes</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-6xl font-black text-white tracking-tighter">Real-time</span>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-4 font-black">Audit Trails</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-6xl font-black text-white tracking-tighter">Secure</span>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-4 font-black">Escrow Layer</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
+            <TestimonialsSection />
+            <FAQSection />
+            <CTASection />
+        </div>
     );
 }
