@@ -13,7 +13,7 @@ export function LiveRafflesSection({ raffles }: Props) {
         <section className="w-full bg-[var(--color-slate-50)] py-24">
             <div className="mx-auto max-w-7xl px-4">
 
-                <div className="flex items-end justify-between mb-12">
+                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-12">
 
                     <div>
                         <h2 className="text-3xl font-bold text-[var(--color-slate-900)]">

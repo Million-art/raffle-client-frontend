@@ -23,7 +23,7 @@ export const WinnersSection = () => {
             <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-brand-blue/10 border border-brand-blue/20 text-brand-blue">
               <Trophy className="h-7 w-7" />
             </div>
-            <h2 className="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-6xl leading-[1.05]">
+            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl leading-[1.05]">
               Real People. <br />
               <span className="text-brand-blue">Verified Fortunes.</span>
             </h2>

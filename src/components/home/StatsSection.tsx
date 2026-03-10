@@ -12,7 +12,7 @@ export function StatsSection() {
     <section className="bg-[var(--color-slate-50)] py-20">
       <div className="max-w-7xl mx-auto px-4">
 
-        <div className="grid md:grid-cols-4 gap-8 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
 
           {stats.map((stat, i) => {
             const Icon = stat.icon;
