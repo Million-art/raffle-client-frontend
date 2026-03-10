@@ -74,7 +74,7 @@ export function FeaturedRaffleSection({ raffles }: Props) {
                             className="grid md:grid-cols-2 gap-14 items-center"
                         >
                             {/* Media */}
-                            <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-xl">
+                            <div className="relative w-full h-[300px] md:h-[420px] rounded-3xl overflow-hidden shadow-xl">
                                 {raffle.videoUrl ? (
                                     <video
                                         src={raffle.videoUrl}
@@ -146,10 +146,10 @@ export function FeaturedRaffleSection({ raffles }: Props) {
                                 </div>
 
                                 {/* CTA + Nav */}
-                                <div className="flex items-center gap-4">
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <Link
                                         href={`/raffles/${raffle.id}`}
-                                        className="inline-flex items-center gap-2 rounded-xl bg-brand-blue px-8 py-4 text-white font-bold hover:bg-blue-600 transition shadow-lg shadow-brand-blue/25"
+                                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand-blue px-8 py-4 text-white font-bold hover:bg-blue-600 transition shadow-lg shadow-brand-blue/25"
                                     >
                                         Enter Raffle
                                         <ArrowRight className="h-5 w-5" />

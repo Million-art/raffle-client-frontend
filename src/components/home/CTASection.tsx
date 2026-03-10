@@ -5,7 +5,7 @@ export function CTASection() {
         <section className="w-full bg-[var(--brand-blue)] min-h-[70vh] flex flex-col justify-center text-center py-20 px-4">
             <div className="mx-auto max-w-4xl w-full flex flex-col items-center">
 
-                <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+                <h2 className="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight px-4">
                     Ready to try your luck?
                 </h2>
 

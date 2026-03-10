@@ -10,7 +10,9 @@ import {
   LogOut,
   UserPlus,
   Ticket,
-  Users
+  Users,
+  Menu,
+  X
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,10 +23,12 @@ export const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     setMenuOpen(false);
+    setMobileOpen(false);
     router.push("/");
   };
 
@@ -32,9 +36,9 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image src="/logo.png" alt="Logo" width={120} height={40} className="h-10 w-auto object-contain" priority />
+        {/* Logo – bigger and more visible */}
+        <Link href="/" className="flex items-center flex-shrink-0">
+          <Image src="/logo.png" alt="Logo" width={160} height={50} className="h-12 w-auto object-contain" priority />
         </Link>
 
         {/* Desktop Menu */}
@@ -155,7 +159,99 @@ export const Navbar = () => {
           )}
 
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          className="md:hidden flex items-center justify-center h-10 w-10 rounded-lg text-gray-600 hover:bg-gray-100 transition"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-slate-100 bg-white shadow-lg animate-fade-in">
+          <div className="px-4 py-4 space-y-1">
+
+            <Link
+              href="/raffles"
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium ${
+                pathname?.startsWith("/raffles")
+                  ? "bg-brand-blue/10 text-brand-blue"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <Users className="h-5 w-5" />
+              Raffles
+            </Link>
+
+            {user && (
+              <>
+                <Link
+                  href="/my-raffles"
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium ${
+                    pathname?.startsWith("/my-raffles")
+                      ? "bg-brand-blue/10 text-brand-blue"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Ticket className="h-5 w-5" />
+                  My Raffles
+                </Link>
+
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  Dashboard
+                </Link>
+              </>
+            )}
+
+            <div className="border-t border-slate-100 pt-3 mt-3">
+              {!loading && (
+                <>
+                  {user ? (
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sign out
+                    </button>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Link
+                        href="/login"
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-slate-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <LogIn className="h-4 w-4" />
+                        Sign in
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-brand-blue text-sm font-semibold text-white hover:bg-blue-600"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Sign up
+                      </Link>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

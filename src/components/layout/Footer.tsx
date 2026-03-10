@@ -9,7 +9,7 @@ export function Footer() {
 
         <div>
           <Link href="/">
-            <Image src="/logo.png" alt="Logo" width={120} height={40} className="h-10 w-auto object-contain mb-3" />
+            <Image src="/logo.png" alt="Logo" width={160} height={50} className="h-12 w-auto object-contain mb-3" />
           </Link>
           <p className="text-sm text-slate-600">
             The trusted platform for secure online raffles.

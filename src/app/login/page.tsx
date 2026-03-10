@@ -109,7 +109,7 @@ function LoginForm() {
     <main className="flex min-h-[85vh] flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
         <div className="mb-8 flex flex-col items-center">
-          <Image src="/logo.png" alt="Logo" width={140} height={48} className="h-12 w-auto object-contain mb-4" />
+          <Image src="/logo.png" alt="Logo" width={160} height={56} className="h-14 w-auto object-contain mb-4" />
           <h1 className="text-2xl font-bold text-slate-900">Sign in to your account</h1>
           <p className="mt-2 text-center text-sm text-slate-600">
             Access your tickets and winnings.

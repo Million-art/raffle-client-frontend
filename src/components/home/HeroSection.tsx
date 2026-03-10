@@ -7,12 +7,12 @@ import { motion } from "framer-motion";
 
 export const HeroSection = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-brand-blue min-h-[80vh] pt-32 pb-24 flex items-center">
+    <section className="relative w-full overflow-hidden bg-brand-blue min-h-[60vh] md:min-h-[80vh] pt-24 md:pt-32 pb-16 md:pb-24 flex items-center">
       
       {/* radial light effect */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.35)_0%,rgba(45,159,246,1)_65%)]" />
 
-      <div className="relative container mx-auto max-w-7xl px-6">
+      <div className="relative container mx-auto max-w-7xl px-4 sm:px-6">
 
         <div className="flex flex-col items-center text-center">
 
@@ -21,7 +21,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight"
           >
             Win Big,{" "}
             <span className="text-brand-yellow">
@@ -34,7 +34,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-4 text-lg text-blue-100 max-w-xl"
+            className="mt-4 text-base sm:text-lg text-blue-100 max-w-xl px-4"
           >
             Participate in the Smart Raffle Platform
           </motion.p>
@@ -44,18 +44,18 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex gap-4 mt-8"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 w-full sm:w-auto px-4 sm:px-0"
           >
             <Link
               href="/raffles"
-              className="bg-white text-brand-blue font-semibold px-6 py-3 rounded-lg shadow hover:scale-105 transition"
+              className="bg-white text-brand-blue font-semibold px-6 py-3 rounded-lg shadow hover:scale-105 transition text-center"
             >
               View Raffles
             </Link>
 
             <Link
               href={process.env.NEXT_PUBLIC_AGENT_SIGNUP_URL || "/agent/signup"}
-              className="border border-white text-white px-6 py-3 rounded-lg hover:bg-white/10 transition flex items-center gap-2"
+              className="border border-white text-white px-6 py-3 rounded-lg hover:bg-white/10 transition flex items-center justify-center gap-2"
             >
               Become an Agent
               <ArrowRight size={18} />
