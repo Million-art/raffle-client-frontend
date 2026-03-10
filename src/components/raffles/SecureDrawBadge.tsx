@@ -14,22 +14,22 @@ export function SecureDrawBadge({ className = "", onInfoClick }: SecureDrawBadge
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.15)] ${className}`}
+            className={`inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 shadow-sm ${className}`}
         >
             <div className="relative flex h-5 w-5 items-center justify-center">
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
                 <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.2, 0.5] }}
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.1, 0.3] }}
                     transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute inset-0 rounded-full bg-emerald-400/20"
+                    className="absolute inset-0 rounded-full bg-emerald-500/20"
                 />
             </div>
 
             <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400/80 leading-none">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600/80 leading-none">
                     Secure Draw
                 </span>
-                <span className="text-[11px] font-bold text-emerald-200 leading-tight">
+                <span className="text-[11px] font-bold text-emerald-800 leading-tight">
                     Verified RNG System
                 </span>
             </div>
@@ -38,7 +38,7 @@ export function SecureDrawBadge({ className = "", onInfoClick }: SecureDrawBadge
                 <button
                     type="button"
                     onClick={onInfoClick}
-                    className="ml-1 rounded-full p-1 text-emerald-500/50 hover:bg-emerald-500/20 hover:text-emerald-400 transition-colors"
+                    className="ml-1 rounded-full p-1 text-emerald-400 hover:bg-emerald-100 hover:text-emerald-600 transition-colors"
                     title="Provably Fair Information"
                 >
                     <Info className="h-3.5 w-3.5" />

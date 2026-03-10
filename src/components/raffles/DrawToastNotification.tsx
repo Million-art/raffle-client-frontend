@@ -67,34 +67,34 @@ export function DrawToastNotification() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 100, opacity: 0 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed bottom-6 right-6 z-[9000] w-80 rounded-2xl border border-amber-500/30 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md"
+                        className="fixed bottom-6 right-6 z-[9000] w-80 rounded-2xl border border-amber-200 bg-white p-4 shadow-2xl"
                         role="alert"
                     >
                         {/* Pulsing accent bar */}
-                        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-amber-500 animate-pulse" />
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl bg-amber-500 animate-pulse" />
 
-                        <div className="pl-2">
+                        <div className="pl-4">
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <Zap className="h-4 w-4 text-amber-400" />
-                                    <span className="text-xs font-black uppercase tracking-widest text-amber-400">
+                                    <Zap className="h-4 w-4 text-amber-600" />
+                                    <span className="text-xs font-black uppercase tracking-widest text-amber-600">
                                         Draw Starting!
                                     </span>
                                 </div>
                                 <button
                                     onClick={() => setDismissed((d) => new Set(d).add(activeToast.raffle.raffleId))}
-                                    className="text-slate-500 hover:text-white transition-colors"
+                                    className="text-slate-400 hover:text-slate-900 transition-colors"
                                     aria-label="Dismiss"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
 
-                            <p className="text-sm font-bold text-white mb-1 line-clamp-1">
+                            <p className="text-sm font-bold text-slate-900 mb-1 line-clamp-1">
                                 {activeToast.raffle.raffleName}
                             </p>
 
-                            <p className="text-xs text-slate-400 mb-3">
+                            <p className="text-xs text-slate-500 mb-4">
                                 {activeToast.state.countdown !== null
                                     ? `Draw begins in ${activeToast.state.countdown} second${activeToast.state.countdown !== 1 ? "s" : ""}`
                                     : "The draw is happening right now!"}
@@ -102,7 +102,7 @@ export function DrawToastNotification() {
 
                             <button
                                 onClick={() => setWatchingId(activeToast.raffle.raffleId)}
-                                className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-slate-900 hover:bg-amber-400 transition-all active:scale-95"
+                                className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-white hover:bg-amber-600 transition-all active:scale-95 shadow-lg shadow-amber-200"
                             >
                                 <Eye className="h-3.5 w-3.5" />
                                 Watch Live

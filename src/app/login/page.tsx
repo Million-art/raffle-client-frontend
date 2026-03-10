@@ -11,26 +11,18 @@ import { GoogleLogin } from "@react-oauth/google";
 /**
  * Sub-component to handle Google Login logic.
  */
-const NO_ACCOUNT_ERROR = "No account found with this email. Please sign up first.";
-
 function GoogleLoginSection() {
-  const { googleLogin, clearError } = useAuth();
+  const { googleLogin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams?.get("redirect") || "/dashboard";
+  const redirect = searchParams?.get("redirect") || "/";
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      await googleLogin(credentialResponse.credential, false);
+      await googleLogin(credentialResponse.credential);
       router.push(redirect);
     } catch (e) {
-      if (e instanceof Error && e.message === NO_ACCOUNT_ERROR) {
-        clearError();
-        const signupUrl = redirect !== "/dashboard"
-          ? `/signup?redirect=${encodeURIComponent(redirect)}`
-          : "/signup";
-        router.push(signupUrl);
-      }
+      // Error is handled by AuthContext (e.g. showing "Different login method")
     }
   };
 
@@ -65,7 +57,7 @@ function LoginForm() {
   const { user, loading: authLoading, login, error, clearError } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams?.get("redirect") || "/dashboard";
+  const redirect = searchParams?.get("redirect") || "/";
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -176,7 +168,7 @@ function LoginForm() {
         <p className="mt-6 text-center text-sm text-slate-600">
           Don&apos;t have an account?{" "}
           <Link
-            href={redirect !== "/dashboard" ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"}
+            href={redirect !== "/" ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"}
             className="font-semibold text-primary-600 hover:text-primary-700"
           >
             Sign up

@@ -16,11 +16,11 @@ function GoogleLoginSection() {
   const { googleLogin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams?.get("redirect") || "/dashboard";
+  const redirect = searchParams?.get("redirect") || "/";
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      await googleLogin(credentialResponse.credential, true);
+      await googleLogin(credentialResponse.credential);
       router.push(redirect);
     } catch {
       // error set in context
@@ -58,7 +58,7 @@ function SignupForm() {
   const { user, loading: authLoading, signup, error, clearError } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams?.get("redirect") || "/dashboard";
+  const redirect = searchParams?.get("redirect") || "/";
 
   const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState("");
@@ -289,7 +289,7 @@ function SignupForm() {
         <p className="mt-6 text-center text-sm text-slate-600">
           Already have an account?{" "}
           <Link
-            href={redirect !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
+            href={redirect !== "/" ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
             className="font-semibold text-primary-600 hover:text-primary-700"
           >
             Sign in

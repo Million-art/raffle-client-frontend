@@ -55,10 +55,10 @@ const Tile = memo(function Tile({
         "relative flex items-center justify-center rounded-lg border text-center font-semibold leading-tight transition-all duration-150 will-change-transform overflow-hidden cursor-default select-none";
 
     const stateClass = isWinner
-        ? "border-amber-400 bg-amber-500/30 text-white scale-[1.08] z-20 shadow-[0_0_30px_rgba(251,191,36,0.6)] ring-2 ring-amber-400/50"
+        ? "border-amber-400 bg-amber-500 text-white scale-[1.08] z-20 shadow-lg shadow-amber-200 ring-2 ring-amber-400/50"
         : isActive
-            ? "border-emerald-400/80 bg-emerald-500/20 text-white scale-[1.05] z-10 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-            : "border-white/5 bg-slate-900/40 text-slate-400 hover:border-white/20 hover:bg-slate-800/60";
+            ? "border-emerald-400 bg-emerald-500 text-white scale-[1.05] z-10 shadow-lg shadow-emerald-200"
+            : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50";
 
     return (
         <motion.div
@@ -84,8 +84,8 @@ const Tile = memo(function Tile({
                     className="pointer-events-none absolute inset-0 rounded-lg"
                     style={{
                         background: isWinner
-                            ? "radial-gradient(circle at 50% 50%, rgba(251,191,36,0.3) 0%, transparent 80%)"
-                            : "radial-gradient(circle at 50% 50%, rgba(16,185,129,0.2) 0%, transparent 80%)",
+                            ? "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 80%)"
+                            : "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 80%)",
                     }}
                 />
             )}
@@ -226,7 +226,7 @@ export const ParticipantGrid = memo(function ParticipantGrid({
 
     if (n === 0) {
         return (
-            <div className="flex h-40 items-center justify-center text-slate-500 text-sm">
+            <div className="flex h-40 items-center justify-center text-slate-400 text-sm italic">
                 Waiting for participants…
             </div>
         );
@@ -234,8 +234,8 @@ export const ParticipantGrid = memo(function ParticipantGrid({
 
     return (
         <div
-            className="w-full overflow-y-auto px-2 py-4 custom-scrollbar"
-            style={{ maxHeight: "50vh" }}
+            className="w-full overflow-y-auto px-2 py-4 shadow-inner bg-slate-50/30 rounded-2xl border border-slate-100"
+            style={{ maxHeight: "40vh" }}
             aria-label="Participant grid"
         >
             <div
