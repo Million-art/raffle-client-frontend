@@ -129,7 +129,7 @@ export const NotificationBell: React.FC = () => {
             case 'high':
                 return 'border-orange-500/50 bg-orange-500/10';
             default:
-                return 'border-white/10 bg-white/5';
+                return 'border-slate-200 bg-slate-50';
         }
     };
 
@@ -142,7 +142,7 @@ export const NotificationBell: React.FC = () => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative rounded-full p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
                 aria-label="Notifications"
             >
                 <Bell className="h-5 w-5" />
@@ -160,14 +160,14 @@ export const NotificationBell: React.FC = () => {
                         aria-hidden="true"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute right-0 top-full z-20 mt-2 w-96 rounded-xl border border-white/10 bg-slate-900 shadow-xl backdrop-blur-md">
+                    <div className="absolute right-0 top-full z-20 mt-2 w-96 rounded-xl border border-slate-200 bg-white shadow-xl">
                         {/* Header */}
-                        <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-                            <h3 className="text-sm font-bold text-white">Notifications</h3>
+                        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                            <h3 className="text-sm font-bold text-slate-900">Notifications</h3>
                             {unreadCount > 0 && (
                                 <button
                                     onClick={handleMarkAllAsRead}
-                                    className="text-xs font-semibold text-primary-400 hover:text-primary-300"
+                                    className="text-xs font-semibold text-primary-600 hover:text-primary-700"
                                 >
                                     Mark all as read
                                 </button>
@@ -182,15 +182,15 @@ export const NotificationBell: React.FC = () => {
                                 </div>
                             ) : notifications.length === 0 ? (
                                 <div className="py-8 text-center">
-                                    <Bell className="mx-auto h-8 w-8 text-slate-600" />
+                                    <Bell className="mx-auto h-8 w-8 text-slate-400" />
                                     <p className="mt-2 text-sm text-slate-500">No notifications yet</p>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-white/5">
+                                <div className="divide-y divide-slate-100">
                                     {notifications.map((notification) => (
                                         <div
                                             key={notification.id}
-                                            className={`group relative px-4 py-3 transition-colors hover:bg-white/5 ${!notification.isRead ? 'bg-primary-500/5' : ''
+                                            className={`group relative px-4 py-3 transition-colors hover:bg-slate-50 ${!notification.isRead ? 'bg-primary-50/50' : ''
                                                 }`}
                                         >
                                             {notification.actionUrl ? (
@@ -217,7 +217,7 @@ export const NotificationBell: React.FC = () => {
                                             {!notification.isRead && (
                                                 <button
                                                     onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                                    className="absolute right-2 top-2 rounded-full p-1 text-slate-500 opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100"
+                                                    className="absolute right-2 top-2 rounded-full p-1 text-slate-400 opacity-0 transition-opacity hover:bg-slate-200 hover:text-slate-900 group-hover:opacity-100"
                                                     aria-label="Mark as read"
                                                 >
                                                     <Check className="h-3 w-3" />
@@ -231,10 +231,10 @@ export const NotificationBell: React.FC = () => {
 
                         {/* Footer */}
                         {notifications.length > 0 && (
-                            <div className="border-t border-white/5 px-4 py-2">
+                            <div className="border-t border-slate-100 px-4 py-2">
                                 <Link
                                     href="/notifications"
-                                    className="block text-center text-xs font-semibold text-primary-400 hover:text-primary-300"
+                                    className="block text-center text-xs font-semibold text-primary-600 hover:text-primary-700"
                                     onClick={() => setIsOpen(false)}
                                 >
                                     View all notifications
@@ -264,20 +264,20 @@ const NotificationContent: React.FC<{ notification: Notification }> = ({ notific
                 {!['winner_confirmation_request', 'payout_ready', 'payout_completed', 'prize_not_delivered', 'raffle_approved', 'raffle_rejected', 'raffle_submitted', 'raffle_drawn', 'winner_compensated'].includes(notification.type) && '✨'}
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white">{notification.title}</p>
-                <p className="mt-0.5 text-xs text-slate-400 line-clamp-2">{notification.message}</p>
+                <p className="text-sm font-semibold text-slate-900">{notification.title}</p>
+                <p className="mt-0.5 text-xs text-slate-600 line-clamp-2">{notification.message}</p>
                 {notification.actionLabel && (
-                    <p className="mt-1 text-xs font-semibold text-primary-400">
+                    <p className="mt-1 text-xs font-semibold text-primary-600">
                         {notification.actionLabel} →
                     </p>
                 )}
-                <p className="mt-1 text-[10px] text-slate-600">
+                <p className="mt-1 text-[10px] text-slate-400">
                     {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                 </p>
             </div>
             {!notification.isRead && (
                 <div className="flex-shrink-0">
-                    <div className="h-2 w-2 rounded-full bg-primary-500" />
+                    <div className="h-2 w-2 rounded-full bg-primary-600" />
                 </div>
             )}
         </div>

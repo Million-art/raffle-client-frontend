@@ -48,13 +48,13 @@ export function WinnerHistory({ winners, title = "Recent Winners" }: WinnerHisto
   ];
 
   return (
-    <div className="py-12 border-t border-white/5">
+    <div className="py-12 border-t border-slate-100">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+        <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
           <Trophy className="h-6 w-6 text-amber-500" />
           {title}
         </h2>
-        <button className="text-sm font-bold text-primary-400 hover:text-primary-300 transition-colors">
+        <button className="text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors">
           View all history
         </button>
       </div>
@@ -66,37 +66,37 @@ export function WinnerHistory({ winners, title = "Recent Winners" }: WinnerHisto
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-md hover:border-amber-500/30 transition-all duration-300 shadow-xl"
+            className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-amber-400 transition-all duration-300 shadow-sm hover:shadow-md"
           >
             {/* Prize Image */}
-            <div className="relative h-40 w-full overflow-hidden bg-white/5 uppercase">
+            <div className="relative h-40 w-full overflow-hidden bg-slate-50 uppercase">
               <img
                 src={winner.imageUrl}
                 alt={winner.prize}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-60"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent" />
               <div className="absolute bottom-3 left-4">
-                <span className="text-xs font-black text-amber-500 tracking-widest bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded">
+                <span className="text-xs font-black text-amber-600 tracking-widest bg-amber-50 border border-amber-100 px-2 py-1 rounded">
                   WINNER
                 </span>
               </div>
             </div>
 
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+              <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                 <Calendar className="h-3 w-3" />
                 {new Date(winner.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </div>
-              <h3 className="text-lg font-bold text-white mb-1">{winner.name}</h3>
-              <p className="text-sm text-slate-400 mb-4 line-clamp-1">{winner.prize}</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-1">{winner.name}</h3>
+              <p className="text-sm text-slate-500 mb-4 line-clamp-1 font-medium">{winner.prize}</p>
 
-              <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                  <User className="h-3 w-3 text-primary-500" />
+                  <User className="h-3.5 w-3.5 text-primary-500" />
                   {winner.agentName}
                 </div>
-                <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center text-white/50 group-hover:bg-primary-500 group-hover:text-white transition-all cursor-pointer">
+                <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary-500 group-hover:text-white transition-all cursor-pointer">
                   <Trophy className="h-4 w-4" />
                 </div>
               </div>

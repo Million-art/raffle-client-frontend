@@ -111,7 +111,7 @@ export function GamifiedDrawOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-950/98 backdrop-blur-3xl"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-white/95 backdrop-blur-3xl"
       role="dialog"
       aria-modal="true"
       aria-label="Raffle draw"
@@ -142,24 +142,24 @@ export function GamifiedDrawOverlay({
               transition={{ repeat: Infinity, duration: 1 }}
               className="mb-8"
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-primary-500/10 px-4 py-1.5 backdrop-blur-md">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-1.5 backdrop-blur-md shadow-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-500" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-600" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-widest text-primary-300">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary-700">
                   Draw Starting In
                 </span>
               </div>
             </motion.div>
 
             <div className="relative">
-              <span className="text-[12rem] font-black leading-none tabular-nums text-white drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+              <span className="text-[12rem] font-black leading-none tabular-nums text-slate-900 drop-shadow-[0_0_50px_rgba(0,0,0,0.05)]">
                 {countdown}
               </span>
             </div>
 
-            <h2 className="mt-8 text-2xl font-bold text-slate-300 max-w-lg">
+            <h2 className="mt-8 text-2xl font-bold text-slate-600 max-w-lg">
               {raffleName}
             </h2>
           </motion.div>
@@ -184,10 +184,10 @@ export function GamifiedDrawOverlay({
               >
                 <SecureDrawBadge />
               </motion.div>
-              <h3 className="text-xs font-black text-slate-500 mb-2 uppercase tracking-[0.3em] opacity-60">
+              <h3 className="text-xs font-black text-slate-400 mb-2 uppercase tracking-[0.3em]">
                 {raffleName}
               </h3>
-              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tighter italic uppercase">
+              <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tighter italic uppercase">
                 {traversalDone ? "DRAW COMPLETE" : "DRAW IN PROGRESS"}
               </h1>
               {traversalDone && winnerName && (
@@ -196,8 +196,8 @@ export function GamifiedDrawOverlay({
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-6 inline-flex flex-col items-center"
                 >
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/60 mb-1">Authenticated Winner</span>
-                  <p className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]">
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600 mb-1">Authenticated Winner</span>
+                  <p className="text-3xl sm:text-4xl font-black text-amber-500 drop-shadow-[0_0_20px_rgba(251,191,36,0.2)]">
                     {winnerName}
                   </p>
                 </motion.div>
@@ -221,9 +221,9 @@ export function GamifiedDrawOverlay({
                 animate={{ opacity: 1 }}
                 className="mt-6 flex flex-col items-center gap-3 w-full max-w-md"
               >
-                <div className="flex items-center gap-3 rounded-full bg-slate-900/60 px-6 py-2 border border-emerald-500/30 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500/20 border-t-emerald-400" />
-                  <span className="text-sm font-bold text-emerald-400 tracking-wide uppercase">
+                <div className="flex items-center gap-3 rounded-full bg-white px-6 py-2 border border-emerald-200 shadow-sm backdrop-blur-md">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-100 border-t-emerald-500" />
+                  <span className="text-sm font-bold text-emerald-600 tracking-wide uppercase">
                     Selecting Winner…
                   </span>
                 </div>
@@ -262,7 +262,7 @@ export function GamifiedDrawOverlay({
           >
             {/* Blurred overlay */}
             <div
-              className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
               onClick={handleClose}
               aria-hidden="true"
             />
@@ -271,7 +271,7 @@ export function GamifiedDrawOverlay({
               role="alertdialog"
               aria-modal="true"
               aria-labelledby="winner-heading"
-              className="relative z-10 flex flex-col items-center text-center max-w-lg w-full rounded-3xl border border-amber-400/30 bg-slate-900/90 px-8 py-10 shadow-[0_0_80px_rgba(251,191,36,0.25)] backdrop-blur-xl"
+              className="relative z-10 flex flex-col items-center text-center max-w-lg w-full rounded-3xl border border-amber-200 bg-white px-8 py-10 shadow-2xl"
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
@@ -283,23 +283,23 @@ export function GamifiedDrawOverlay({
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="mb-4"
               >
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-500/20 border border-amber-400/40 shadow-[0_0_30px_rgba(251,191,36,0.3)]">
-                  <Trophy className="h-10 w-10 text-amber-400" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 border border-amber-100 shadow-sm">
+                  <Trophy className="h-10 w-10 text-amber-500" />
                 </div>
               </motion.div>
 
-              <p className="text-xl font-black uppercase tracking-[0.5em] text-amber-500 mb-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">
+              <p className="text-xl font-black uppercase tracking-[0.5em] text-amber-600 mb-2">
                 🎉 WINNER REVEALED 🎉
               </p>
 
               <h2
                 id="winner-heading"
-                className="text-4xl sm:text-5xl font-black text-white leading-tight mb-3 break-words"
+                className="text-4xl sm:text-5xl font-black text-slate-900 leading-tight mb-3 break-words"
               >
                 {winnerName || drawState.winnerName || ""}
               </h2>
 
-              <p className="text-sm text-slate-400 mb-8">
+              <p className="text-sm text-slate-500 mb-8">
                 Congratulations! The winner has been selected.
               </p>
 
@@ -308,7 +308,7 @@ export function GamifiedDrawOverlay({
                 <button
                   type="button"
                   onClick={() => setShowProvablyFair(!showProvablyFair)}
-                  className="flex items-center justify-center gap-2 w-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300 transition-colors py-2 border-t border-white/5"
+                  className="flex items-center justify-center gap-2 w-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-colors py-2 border-t border-slate-100"
                 >
                   {showProvablyFair ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                   Provably Fair Details
@@ -322,12 +322,12 @@ export function GamifiedDrawOverlay({
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 rounded-xl bg-black/40 border border-white/5 px-4 py-3 text-left">
+                      <div className="mt-2 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 text-left">
                         <div className="flex items-center gap-2 mb-2">
-                          <ShieldCheck className="h-3 w-3 text-emerald-500" />
-                          <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">System Integrity Verified</span>
+                          <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">System Integrity Verified</span>
                         </div>
-                        <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">
                           Fairness Hash (SHA-256)
                         </p>
                         <FairnessHashDisplay winnerName={winnerName || ""} winnerIndex={winnerSectorIndex} />
@@ -342,11 +342,10 @@ export function GamifiedDrawOverlay({
                 <button
                   ref={closeBtnRef}
                   onClick={handleClose}
-                  className="flex-1 group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-white px-6 py-3 text-sm font-black text-slate-950 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-slate-900 px-6 py-3 text-sm font-black text-white transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-200"
                 >
                   <span className="relative z-10">Close</span>
                   <X className="relative z-10 h-4 w-4" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 transition-opacity group-hover:opacity-100" />
                 </button>
               </div>
             </motion.div>
@@ -444,6 +443,6 @@ function FairnessHashDisplay({
   }, [winnerName, winnerIndex]);
 
   return (
-    <p className="font-mono text-[10px] text-slate-400 truncate">{hash}</p>
+    <p className="font-mono text-[10px] text-slate-500 truncate">{hash}</p>
   );
 }
