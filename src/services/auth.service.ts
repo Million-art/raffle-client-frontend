@@ -69,7 +69,7 @@ export async function googleLogin(credential: string, isSignup: boolean = false)
 
 export async function getMe(): Promise<{ user: User } | null> {
   try {
-    const response = await apiFetch<ApiResponse<{ user: User }>>("/api/me");
+    const response = await apiFetch<ApiResponse<{ user: User }>>("/api/me", { skipAuthRedirect: true });
     return response.data;
   } catch {
     return null;
