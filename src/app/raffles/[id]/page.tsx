@@ -10,10 +10,9 @@ import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
 import { DrawContainerReveal } from "@/components/raffles/DrawContainerReveal";
 import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
-import { TrustBadges } from "@/components/raffles/TrustBadges";
 import { StepsGuide } from "@/components/raffles/StepsGuide";
 import { WinnerHistory } from "@/components/raffles/WinnerHistory";
-import { ArrowLeft, Calendar, User, Loader2, X, Ticket, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Calendar, User, Loader2, X, Ticket, ShieldCheck, Share2, Copy, Facebook, Send, MessageCircle } from "lucide-react";
 
 export default function RaffleDetailPage() {
   const params = useParams();
@@ -110,6 +109,12 @@ export default function RaffleDetailPage() {
       setJoinLoading(false);
     }
   }, [raffle, joinQuantity, loadRaffle, user]);
+  
+  const handleCopyLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setFlash({ type: "success", text: "Link copied to clipboard!" });
+  };
 
   useEffect(() => {
     const payment = searchParams?.get("payment");
@@ -216,8 +221,6 @@ export default function RaffleDetailPage() {
               <p className="text-right text-xs font-bold text-primary-600">{Math.round(progress)}% filled</p>
             </div>
 
-            {/* Trust Badges */}
-            <TrustBadges />
 
             {/* Full-screen draw overlay - cannot be closed until draw completes */}
             {/* Gamified Full-Screen Overlay */}
@@ -293,6 +296,63 @@ export default function RaffleDetailPage() {
               >
                 {raffle.status === 'approved' ? 'Join this raffle' : 'Sold Out / Closed'}
               </button>
+            </div>
+
+            {/* Share Section */}
+            <div className="mt-8 pt-8 border-t border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center">
+                    <Share2 className="h-5 w-5 text-slate-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Share this raffle</h3>
+                    <p className="text-xs text-slate-500">Invite friends to join and win!</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-700 text-sm font-bold hover:bg-slate-100 transition-colors border border-slate-100"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copy Link
+                  </button>
+                  
+                  <div className="flex items-center gap-2 ml-2">
+                    <a
+                      href={`https://t.me/share/url?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(`Check out this raffle: ${raffle.name}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-xl bg-[#0088cc]/10 text-[#0088cc] hover:bg-[#0088cc]/20 transition-colors"
+                      title="Share on Telegram"
+                    >
+                      <Send className="h-5 w-5" />
+                    </a>
+                    
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this raffle: ${raffle.name} - ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
+                      title="Share on WhatsApp"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                    </a>
+                    
+                    <a
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-xl bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2]/20 transition-colors"
+                      title="Share on Facebook"
+                    >
+                      <Facebook className="h-5 w-5" />
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </article>
