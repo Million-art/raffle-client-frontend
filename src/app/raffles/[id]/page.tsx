@@ -93,7 +93,7 @@ export default function RaffleDetailPage() {
     setJoinLoading(true);
     setFlash(null);
     try {
-      const data = await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email);
+      const data = await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email, user?.phone);
       if (data.checkout_url) {
         setFlash({ type: "success", text: "Redirecting to payment..." });
         window.location.href = data.checkout_url;
