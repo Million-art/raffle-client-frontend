@@ -456,7 +456,7 @@ export default function MyRafflesPage() {
                                 <button
                                     onClick={handleConfirm}
                                     disabled={confirming}
-                                    className="flex-1 rounded-2xl bg-primary-600 py-4 text-sm font-black text-white hover:bg-primary-500 disabled:opacity-50 transition-all shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2"
+                                    className="flex-1 rounded-2xl bg-primary-600 py-4 text-sm font-black text-slate-700 hover:bg-primary-500 disabled:opacity-50 transition-all shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2"
                                 >
                                     {confirming ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Confirmation"}
                                 </button>
