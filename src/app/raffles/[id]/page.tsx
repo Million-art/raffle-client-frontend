@@ -13,6 +13,7 @@ import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { StepsGuide } from "@/components/raffles/StepsGuide";
 import { WinnerHistory } from "@/components/raffles/WinnerHistory";
 import { ArrowLeft, Calendar, User, Loader2, X, Ticket, ShieldCheck, Share2, Copy, Facebook, Send, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function RaffleDetailPage() {
   const params = useParams();
@@ -42,7 +43,6 @@ export default function RaffleDetailPage() {
   const [joinQuantity, setJoinQuantity] = useState(1);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
-  const [flash, setFlash] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const loadRaffle = useCallback(async () => {
     if (!id) return;
@@ -80,7 +80,7 @@ export default function RaffleDetailPage() {
 
   const handleJoinClick = useCallback(() => {
     if (!user) {
-      setFlash({ type: "error", text: "Please log in to join this raffle." });
+      toast.error("Please log in to join this raffle.");
       router.push(`/login?redirect=/raffles/${id}`);
       return;
     }
@@ -91,20 +91,19 @@ export default function RaffleDetailPage() {
   const handleJoinConfirm = useCallback(async () => {
     if (!raffle) return;
     setJoinLoading(true);
-    setFlash(null);
     try {
       const data = await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email, user?.phone);
       if (data.checkout_url) {
-        setFlash({ type: "success", text: "Redirecting to payment..." });
+        toast.success("Redirecting to payment...");
         window.location.href = data.checkout_url;
       } else {
-        setFlash({ type: "success", text: `You joined with ${joinQuantity} ticket(s).` });
+        toast.success(`You joined with ${joinQuantity} ticket(s).`);
         setJoinModalOpen(false);
         loadRaffle();
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to join raffle";
-      setFlash({ type: "error", text: msg });
+      toast.error(msg);
     } finally {
       setJoinLoading(false);
     }
@@ -113,15 +112,15 @@ export default function RaffleDetailPage() {
   const handleCopyLink = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    setFlash({ type: "success", text: "Link copied to clipboard!" });
+    toast.success("Link copied to clipboard!");
   };
 
   useEffect(() => {
     const payment = searchParams?.get("payment");
     if (payment === "success") {
-      setFlash({ type: "success", text: "Payment received! Your tickets are being issued." });
+      toast.success("Payment received! Your tickets are being issued.");
     } else if (payment === "failed") {
-      setFlash({ type: "error", text: "Payment failed or was cancelled." });
+      toast.error("Payment failed or was cancelled.");
     }
   }, [searchParams]);
 
@@ -161,20 +160,6 @@ export default function RaffleDetailPage() {
           <ArrowLeft className="h-4 w-4" /> {backLabel}
         </Link>
 
-        {flash && (
-          <div
-            className={`mb-6 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${flash.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-600"
-              : "border-red-200 bg-red-50 text-red-600"
-              }`}
-            role="alert"
-          >
-            {flash.text}
-            <button type="button" onClick={() => setFlash(null)} className="ml-2 underline">
-              Dismiss
-            </button>
-          </div>
-        )}
 
         <article className="rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
           {/* Product Media - AliExpress style gallery */}
