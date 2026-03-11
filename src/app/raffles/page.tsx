@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
-import { getRaffles, purchaseTickets } from "@/services/raffles.service";
+import { getRaffles } from "@/services/raffles.service";
 import type { RaffleListItem } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function RafflesPage() {
   const router = useRouter();
@@ -21,10 +21,6 @@ export default function RafflesPage() {
   const limit = 20;
 
   const requestId = useRef(0);
-
-  const [joinRaffle, setJoinRaffle] = useState<RaffleListItem | null>(null);
-  const [joinQuantity, setJoinQuantity] = useState(1);
-  const [joinLoading, setJoinLoading] = useState(false);
 
   const [flash, setFlash] = useState<{
     type: "success" | "error";
@@ -62,86 +58,16 @@ export default function RafflesPage() {
     return () => clearTimeout(t);
   }, [flash]);
 
+  /** Navigate to detail; redirect to login first if not authenticated. */
   const handleJoinClick = useCallback(
     (raffle: RaffleListItem) => {
       if (!user) {
-        setFlash({ type: "error", text: "Please log in to join a raffle." });
-        router.push("/login?redirect=/raffles");
+        router.push(`/login?redirect=/raffles/${raffle.id}`);
         return;
       }
-
-      setJoinRaffle(raffle);
-      setJoinQuantity(1);
+      router.push(`/raffles/${raffle.id}`);
     },
     [user, router]
-  );
-
-  const handleJoinConfirm = useCallback(async () => {
-    if (!joinRaffle) return;
-
-    setJoinLoading(true);
-    setFlash(null);
-
-    try {
-      await purchaseTickets(
-        joinRaffle.id,
-        joinQuantity,
-        undefined,
-        user?.fullName,
-        user?.email
-      );
-
-      setFlash({
-        type: "success",
-        text: `You joined "${joinRaffle.name}" with ${joinQuantity} ticket(s).`,
-      });
-
-      setJoinRaffle(null);
-      loadRaffles();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to join raffle";
-
-      setFlash({
-        type: "error",
-        text: msg,
-      });
-    } finally {
-      setJoinLoading(false);
-    }
-  }, [joinRaffle, joinQuantity, loadRaffles, user]);
-
-  const handleJoinClose = useCallback(() => {
-    if (!joinLoading) setJoinRaffle(null);
-  }, [joinLoading]);
-
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleJoinClose();
-    };
-
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [handleJoinClose]);
-
-  const handleQuantityChange = useCallback(
-    (value: string) => {
-      if (!joinRaffle) return;
-
-      const remaining =
-        joinRaffle.totalTickets - joinRaffle.ticketsSold;
-
-      const val = Number(value);
-
-      if (Number.isNaN(val)) {
-        setJoinQuantity(1);
-        return;
-      }
-
-      const clamped = Math.max(1, Math.min(val, remaining));
-
-      setJoinQuantity(clamped);
-    },
-    [joinRaffle]
   );
 
   return (
@@ -151,10 +77,11 @@ export default function RafflesPage() {
       <div className="container relative z-10 mx-auto max-w-7xl px-4">
         {flash && (
           <div
-            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${flash.type === "success"
+            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${
+              flash.type === "success"
                 ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
                 : "border-red-500/20 bg-red-500/10 text-red-400"
-              }`}
+            }`}
             role="alert"
           >
             {flash.text}
@@ -228,9 +155,7 @@ export default function RafflesPage() {
               <div className="mt-12 flex items-center justify-center gap-4">
                 <button
                   type="button"
-                  onClick={() =>
-                    setPage((p) => Math.max(1, p - 1))
-                  }
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                   className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50 hover:bg-slate-100"
                 >
@@ -244,9 +169,7 @@ export default function RafflesPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    setPage((p) =>
-                      Math.min(Math.ceil(total / limit), p + 1)
-                    )
+                    setPage((p) => Math.min(Math.ceil(total / limit), p + 1))
                   }
                   disabled={page >= Math.ceil(total / limit)}
                   className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50 hover:bg-slate-100"
@@ -265,92 +188,6 @@ export default function RafflesPage() {
           </>
         )}
       </div>
-
-      {joinRaffle && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
-          onClick={handleJoinClose}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="join-raffle-title"
-        >
-          <div
-            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h2
-                id="join-raffle-title"
-                className="text-lg font-bold text-slate-900"
-              >
-                Join raffle
-              </h2>
-
-              <button
-                type="button"
-                onClick={handleJoinClose}
-                disabled={joinLoading}
-                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <p className="mb-4 text-sm text-slate-600">
-              {joinRaffle.name}
-            </p>
-
-            <div className="mb-4">
-              <label
-                htmlFor="join-quantity"
-                className="mb-1 block text-sm font-semibold text-slate-700"
-              >
-                Number of tickets
-              </label>
-
-              <input
-                id="join-quantity"
-                type="number"
-                min={1}
-                max={
-                  joinRaffle.totalTickets -
-                  joinRaffle.ticketsSold
-                }
-                value={joinQuantity}
-                onChange={(e) =>
-                  handleQuantityChange(e.target.value)
-                }
-                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-slate-900 outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20"
-              />
-
-              <p className="mt-1 text-xs text-slate-500">
-                {(joinRaffle.ticketPrice * joinQuantity).toLocaleString()} ETB
-                total
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleJoinClose}
-                disabled={joinLoading}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handleJoinConfirm}
-                disabled={joinLoading}
-                className="flex-1 rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50"
-              >
-                {joinLoading ? "Joining…" : "Join"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
