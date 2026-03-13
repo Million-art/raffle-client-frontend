@@ -1,74 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RaffleCard } from "@/components/raffles/RaffleCard";
-import { getRaffles } from "@/services/raffles.service";
-import type { RaffleListItem } from "@/services/raffles.service";
+import { useRaffles } from "@/hooks/useRaffles";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRaffleListUpdates } from "@/hooks/useRaffleListUpdates";
+import type { RaffleListItem } from "@/services/raffles.service";
 import { Loader2 } from "lucide-react";
+
+const LIMIT = 20;
 
 export default function RafflesPage() {
   const router = useRouter();
   const { user } = useAuth();
-
-  const [items, setItems] = useState<RaffleListItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const limit = 20;
 
-  const requestId = useRef(0);
+  const { items, total, isLoading, isError, error, refetch } = useRaffles({
+    page,
+    limit: LIMIT,
+    liveOnly: false,
+  });
 
-  const [flash, setFlash] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+  const [flash, setFlash] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const loadRaffles = useCallback(() => {
-    const id = ++requestId.current;
+  const handleJoinClick = (raffle: RaffleListItem) => {
+    if (!user) {
+      router.push(`/login?redirect=/raffles/${raffle.id}`);
+      return;
+    }
+    router.push(`/raffles/${raffle.id}`);
+  };
 
-    setLoading(true);
-
-    getRaffles({ page, limit })
-      .then((r) => {
-        if (id !== requestId.current) return;
-
-        setItems(r.items);
-        setTotal(r.total);
-      })
-      .catch(() => setError("Could not load raffles"))
-      .finally(() => {
-        if (id === requestId.current) setLoading(false);
-      });
-  }, [page]);
-
-  useEffect(() => {
-    loadRaffles();
-  }, [loadRaffles]);
-
-  useRaffleListUpdates(loadRaffles);
-
-  useEffect(() => {
-    if (!flash) return;
-
-    const t = setTimeout(() => setFlash(null), 4000);
-    return () => clearTimeout(t);
-  }, [flash]);
-
-  /** Navigate to detail; redirect to login first if not authenticated. */
-  const handleJoinClick = useCallback(
-    (raffle: RaffleListItem) => {
-      if (!user) {
-        router.push(`/login?redirect=/raffles/${raffle.id}`);
-        return;
-      }
-      router.push(`/raffles/${raffle.id}`);
-    },
-    [user, router]
-  );
+  const totalPages = Math.ceil(total / LIMIT);
 
   return (
     <main className="min-h-screen border-t border-slate-200 bg-slate-50 pt-8 pb-24 relative overflow-hidden">
@@ -85,7 +48,6 @@ export default function RafflesPage() {
             role="alert"
           >
             {flash.text}
-
             <button
               type="button"
               onClick={() => setFlash(null)}
@@ -104,30 +66,35 @@ export default function RafflesPage() {
                 Live Infrastructure
               </span>
             </div>
-
             <h1 className="text-4xl font-black tracking-tight text-slate-900">
               Explore Raffles
             </h1>
-
             <p className="mt-2 font-medium text-slate-600">
               Browse through verified opportunities and find your next win.
             </p>
           </div>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex min-h-[300px] items-center justify-center">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-primary-500/20 blur-xl animate-pulse" />
               <Loader2 className="h-10 w-10 animate-spin text-primary-500 relative" />
             </div>
           </div>
-        ) : error ? (
+        ) : isError ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-600 backdrop-blur-md">
-            <p className="font-semibold">{error}</p>
+            <p className="font-semibold">{error?.message ?? "Could not load raffles"}</p>
             <p className="mt-1 text-sm opacity-90">
               Make sure the client backend and admin backend are running.
             </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="mt-4 rounded-xl border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+            >
+              Retry
+            </button>
           </div>
         ) : items.length === 0 ? (
           <div className="rounded-[2rem] border border-slate-200 bg-white p-24 text-center shadow-sm">
@@ -151,7 +118,7 @@ export default function RafflesPage() {
               ))}
             </div>
 
-            {total > limit && (
+            {total > LIMIT && (
               <div className="mt-12 flex items-center justify-center gap-4">
                 <button
                   type="button"
@@ -161,17 +128,13 @@ export default function RafflesPage() {
                 >
                   Previous
                 </button>
-
                 <span className="text-sm text-slate-500">
-                  Page {page} of {Math.ceil(total / limit)}
+                  Page {page} of {totalPages}
                 </span>
-
                 <button
                   type="button"
-                  onClick={() =>
-                    setPage((p) => Math.min(Math.ceil(total / limit), p + 1))
-                  }
-                  disabled={page >= Math.ceil(total / limit)}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
                   className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50 hover:bg-slate-100"
                 >
                   Next

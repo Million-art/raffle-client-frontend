@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Ticket, ArrowRight, Loader2, Home, AlertCircle, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { getRaffleById, getPaymentStatus, type RaffleDetail } from "@/services/raffles.service";
-import { toast } from "sonner";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     
@@ -186,5 +185,17 @@ export default function PaymentSuccessPage() {
                 </div>
             </motion.div>
         </main>
+    );
+}
+
+export default function PaymentSuccessPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+            </main>
+        }>
+            <PaymentSuccessContent />
+        </Suspense>
     );
 }

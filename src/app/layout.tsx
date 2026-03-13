@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Providers } from "@/components/providers/Providers";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DrawToastNotification } from "@/components/raffles/DrawToastNotification";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -22,15 +23,17 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <body className="min-h-screen bg-white selection:bg-brand-blue/10 selection:text-brand-blue antialiased flex flex-col">
-        <Providers>
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Toaster position="top-right" richColors />
-          <DrawToastNotification />
-          <Footer />
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            <Navbar />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Toaster position="top-right" richColors />
+            <DrawToastNotification />
+            <Footer />
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );
