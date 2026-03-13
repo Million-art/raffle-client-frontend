@@ -20,6 +20,13 @@ function PaymentSuccessContent() {
     const raffleIdFromUrl = searchParams?.get("raffle_id");
 
     useEffect(() => {
+        // Reset state when transaction reference changes
+        if (txRef) {
+            setStatus("verifying");
+            setAttempts(0);
+            setRaffle(null);
+        }
+        
         // If there's no transaction reference, it's likely the user cancelled 
         // or navigated here manually. Redirect to failed/cancelled page.
         if (!txRef) {
@@ -44,7 +51,7 @@ function PaymentSuccessContent() {
                 }
             } else {
                 // Keep polling
-                if (attempts < 10) {
+                if (attempts < 30) { // Increased to 30 (60 seconds) for slower transactions
                     setTimeout(() => {
                         setAttempts(prev => prev + 1);
                     }, 2000);
