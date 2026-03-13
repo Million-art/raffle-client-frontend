@@ -1,32 +1,24 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMyRaffles, type MyRaffle } from "@/services/raffles.service";
+import { useMyRaffles } from "@/hooks/useMyRaffles";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 import { useRaffleWebSocketMulti } from "@/hooks/useRaffleWebSocketMulti";
 import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { motion } from "framer-motion";
 import { Trophy, Ticket, Clock, Loader2, RefreshCw, Eye, ChevronRight, CheckCircle2, AlertTriangle, Star, MessageSquare } from "lucide-react";
-import { confirmPrize } from "@/services/raffles.service";
+import { confirmPrize, type MyRaffle } from "@/services/raffles.service";
 
 export default function MyRafflesPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
-    const [raffles, setRaffles] = useState<MyRaffle[]>([]);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    // Draw overlay state — which raffle is the user watching live
     const [watchingRaffleId, setWatchingRaffleId] = useState<string | null>(null);
-
-    // Filtering and Pagination
     const [statusFilter, setStatusFilter] = useState<"all" | "active" | "won" | "completed">("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
-
-    // Confirmation Modal State
     const [confirmingRaffle, setConfirmingRaffle] = useState<MyRaffle | null>(null);
     const [confirming, setConfirming] = useState(false);
     const [confData, setConfData] = useState({
@@ -36,20 +28,13 @@ export default function MyRafflesPage() {
         feedback: ""
     });
 
-    const load = useCallback(() => {
-        setLoading(true);
-        getMyRaffles({
-            status: statusFilter !== "all" ? statusFilter : undefined,
-            page: currentPage,
-            limit: itemsPerPage
-        })
-            .then((data) => {
-                setRaffles(data.raffles);
-                setTotal(data.total);
-            })
-            .catch(() => setError("Could not load your raffles. Please try again."))
-            .finally(() => setLoading(false));
-    }, [statusFilter, currentPage, itemsPerPage]);
+    const queryClient = useQueryClient();
+    const { raffles, total, isLoading: loading, isError, error, refetch } = useMyRaffles({
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        page: currentPage,
+        limit: itemsPerPage,
+        enabled: !!user,
+    });
 
     const handleConfirm = async () => {
         if (!confirmingRaffle?.confirmationId) return;
@@ -57,7 +42,8 @@ export default function MyRafflesPage() {
         try {
             await confirmPrize(confirmingRaffle.confirmationId, confData);
             setConfirmingRaffle(null);
-            load();
+            queryClient.invalidateQueries({ queryKey: queryKeys.me.raffles() });
+            refetch();
         } catch (err) {
             alert("Failed to confirm. Please try again.");
         } finally {
@@ -65,16 +51,11 @@ export default function MyRafflesPage() {
         }
     };
 
-    // Redirect unauthenticated users
     useEffect(() => {
         if (!authLoading && !user) {
             router.push("/login?from=/my-raffles");
         }
     }, [user, authLoading, router]);
-
-    useEffect(() => {
-        if (user) load();
-    }, [user, load]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -162,7 +143,7 @@ export default function MyRafflesPage() {
                             ))}
                         </div>
                         <button
-                            onClick={load}
+                            onClick={() => refetch()}
                             className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm text-slate-600 hover:bg-slate-50 transition-all"
                             title="Refresh"
                         >
@@ -196,8 +177,8 @@ export default function MyRafflesPage() {
                     </motion.div>
                 )}
 
-                {error && (
-                    <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{error}</div>
+                {isError && (
+                    <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{error?.message ?? "Could not load your raffles."}</div>
                 )}
 
                 {raffles.length === 0 && !loading ? (
@@ -476,7 +457,7 @@ export default function MyRafflesPage() {
                     winnerSectorIndex={watchingState.winnerSectorIndex}
                     onClose={() => {
                         setWatchingRaffleId(null);
-                        load(); // Refresh to get updated winner
+                        refetch();
                     }}
                 />
             )}

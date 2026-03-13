@@ -73,10 +73,18 @@ class WebSocketClient {
                     }
                 };
 
-                this.ws.onerror = (error) => {
-                    console.error('[WebSocket] Error:', error);
+                this.ws.onerror = (event: Event) => {
+                    // DOM Event doesn't serialize; extract useful context for debugging.
+                    const target = event.target as WebSocket | null;
+                    const detail = {
+                        type: event.type,
+                        url: target?.url,
+                        readyState: target?.readyState,
+                        readyStateLabel: target ? ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][target.readyState] : 'unknown',
+                    };
+                    console.error('[WebSocket] Error:', JSON.stringify(detail));
                     if (this.ws?.readyState !== WebSocket.OPEN) {
-                        reject(error);
+                        reject(new Error(`WebSocket error: ${detail.readyStateLabel} at ${detail.url ?? 'unknown'}`));
                     }
                 };
 

@@ -1,18 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getRaffleById, purchaseTickets } from "@/services/raffles.service";
-import type { RaffleDetail } from "@/services/raffles.service";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRaffle } from "@/hooks/useRaffle";
+import { usePurchaseTickets } from "@/hooks/usePurchaseTickets";
 import { useRaffleWebSocket } from "@/hooks/useRaffleWebSocket";
 import { ProductMediaGallery } from "@/components/raffles/ProductMediaGallery";
 import { DrawContainerReveal } from "@/components/raffles/DrawContainerReveal";
 import { GamifiedDrawOverlay } from "@/components/raffles/GamifiedDrawOverlay";
 import { StepsGuide } from "@/components/raffles/StepsGuide";
 import { WinnerHistory } from "@/components/raffles/WinnerHistory";
-import { ArrowLeft, Calendar, User, Loader2, X, Ticket, ShieldCheck, Share2, Copy, Facebook, Send, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, User, Loader2, X, Ticket, Share2, Copy, Facebook, Send, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function RaffleDetailPage() {
@@ -26,9 +26,8 @@ export default function RaffleDetailPage() {
   const backHref = from === "my-raffles" ? "/my-raffles" : "/raffles";
   const backLabel = from === "my-raffles" ? "Back to my raffles" : "Back to raffles";
 
-  const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { raffle: fetchedRaffle, isLoading: loading, isError: hasError, error: fetchError, refetch } = useRaffle(id);
+  const purchaseMutation = usePurchaseTickets();
 
   const {
     ticketsSold: wsTicketsSold,
@@ -40,43 +39,20 @@ export default function RaffleDetailPage() {
     wheelData,
   } = useRaffleWebSocket(id);
 
+  // Merge WebSocket updates with fetched raffle
+  const raffle = fetchedRaffle
+    ? {
+        ...fetchedRaffle,
+        ticketsSold: wsTicketsSold ?? fetchedRaffle.ticketsSold,
+        status: (wsStatus ?? fetchedRaffle.status) ?? undefined,
+        winnerId: wsWinnerId ?? fetchedRaffle.winnerId,
+        winnerName: wsWinnerName ?? fetchedRaffle.winnerName,
+      }
+    : null;
+
   const [joinQuantity, setJoinQuantity] = useState(1);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
-  const [joinLoading, setJoinLoading] = useState(false);
-
-  const loadRaffle = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getRaffleById(id);
-      setRaffle(data);
-    } catch {
-      setError("Raffle not found.");
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    loadRaffle();
-  }, [loadRaffle]);
-
-  // Sync real-time updates from WebSocket
-  useEffect(() => {
-    if (wsTicketsSold !== null || wsStatus !== null || wsWinnerId !== null || wsWinnerName !== null) {
-      setRaffle((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          ticketsSold: wsTicketsSold ?? prev.ticketsSold,
-          status: wsStatus ?? prev.status,
-          winnerId: wsWinnerId ?? prev.winnerId,
-          winnerName: wsWinnerName ?? prev.winnerName,
-        };
-      });
-    }
-  }, [wsTicketsSold, wsStatus, wsWinnerId, wsWinnerName]);
+  const joinLoading = purchaseMutation.isPending;
 
   const handleJoinClick = useCallback(() => {
     if (!user) {
@@ -90,24 +66,26 @@ export default function RaffleDetailPage() {
 
   const handleJoinConfirm = useCallback(async () => {
     if (!raffle) return;
-    setJoinLoading(true);
     try {
-      const data = await purchaseTickets(raffle.id, joinQuantity, undefined, user?.fullName, user?.email, user?.phone);
+      const data = await purchaseMutation.mutateAsync({
+        raffleId: raffle.id,
+        quantity: joinQuantity,
+        participantName: user?.fullName,
+        participantEmail: user?.email,
+        participantPhone: user?.phone,
+      });
       if (data.checkout_url) {
         toast.success("Redirecting to payment...");
         window.location.href = data.checkout_url;
       } else {
         toast.success(`You joined with ${joinQuantity} ticket(s).`);
         setJoinModalOpen(false);
-        loadRaffle();
+        refetch();
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to join raffle";
-      toast.error(msg);
-    } finally {
-      setJoinLoading(false);
+      toast.error(e instanceof Error ? e.message : "Failed to join raffle");
     }
-  }, [raffle, joinQuantity, loadRaffle, user]);
+  }, [raffle, joinQuantity, user, purchaseMutation, refetch]);
   
   const handleCopyLink = () => {
     const url = window.location.href;
@@ -127,18 +105,29 @@ export default function RaffleDetailPage() {
     );
   }
 
-  if (error || !raffle) {
+  if (hasError || (!loading && !raffle)) {
     return (
       <main className="min-h-screen bg-slate-50 pt-8 pb-24">
         <div className="container mx-auto max-w-3xl px-4">
-          <p className="text-red-600 font-medium">{error ?? "Raffle not found."}</p>
-          <Link href={backHref} className="mt-4 inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700">
-            <ArrowLeft className="h-4 w-4" /> {backLabel}
-          </Link>
+          <p className="text-red-600 font-medium">{fetchError?.message ?? "Raffle not found."}</p>
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Retry
+            </button>
+            <Link href={backHref} className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700">
+              <ArrowLeft className="h-4 w-4" /> {backLabel}
+            </Link>
+          </div>
         </div>
       </main>
     );
   }
+
+  if (!raffle) return null;
 
   const progress = raffle.totalTickets > 0 ? (raffle.ticketsSold / raffle.totalTickets) * 100 : 0;
 

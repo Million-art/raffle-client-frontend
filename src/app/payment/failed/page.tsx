@@ -1,11 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { XCircle, ArrowLeft, RefreshCw, Home } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function PaymentFailedPage() {
+function PaymentFailedContent() {
     const searchParams = useSearchParams();
     const raffleId = searchParams?.get("raffle_id");
 
@@ -63,5 +64,17 @@ export default function PaymentFailedPage() {
                 </div>
             </motion.div>
         </main>
+    );
+}
+
+export default function PaymentFailedPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+            </main>
+        }>
+            <PaymentFailedContent />
+        </Suspense>
     );
 }
