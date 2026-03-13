@@ -256,3 +256,11 @@ export async function getConfirmation(confirmationId: string): Promise<MyRaffle>
   return response.data.data;
 }
 
+/** Check payment status by transaction reference (tx_ref) */
+export async function getPaymentStatus(txRef: string): Promise<{ status: "pending" | "success" | "error"; raffle_id?: string; quantity?: number }> {
+  const response = await apiFetch<ApiResponse<{ status: "pending" | "success" | "error"; raffle_id?: string; quantity?: number }>>(
+    `/api/payments/status/${txRef}`
+  );
+  return response.data;
+}
+
