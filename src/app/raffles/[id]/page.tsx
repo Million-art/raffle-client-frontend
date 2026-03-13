@@ -115,14 +115,6 @@ export default function RaffleDetailPage() {
     toast.success("Link copied to clipboard!");
   };
 
-  useEffect(() => {
-    const payment = searchParams?.get("payment");
-    if (payment === "success") {
-      toast.success("Payment received! Your tickets are being issued.");
-    } else if (payment === "failed") {
-      toast.error("Payment failed or was cancelled.");
-    }
-  }, [searchParams]);
 
   if (loading) {
     return (
