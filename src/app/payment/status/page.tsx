@@ -37,7 +37,7 @@ function PaymentStatusContent() {
 
   const statusParam = getParam("status");
   const raffleId = getParam("raffle_id");
-  const txRef = getParam("tx_ref") || getParam("trx_ref") || getParam("transaction_id");
+  const txRef = getParam("tx_ref");
   const message = getParam("message");
 
   // Internal state
@@ -201,6 +201,18 @@ function PaymentStatusContent() {
               >
                 <RefreshCcw className="h-5 w-5" />
                 Retry Purchase
+              </Link>
+              <Link
+                href="/my-raffles"
+                className="w-full py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
+              >
+                View My Tickets
+              </Link>
+              <Link
+                href="/contact"
+                className="w-full py-3 text-slate-500 text-sm font-medium hover:text-slate-700 transition-colors"
+              >
+                Contact support if your payment went through
               </Link>
               <Link
                 href="/"
