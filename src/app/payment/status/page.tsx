@@ -6,16 +6,22 @@ import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, Home, Ticket, AlertCircle, RefreshCcw } from "lucide-react";
 import { getRaffleById, type RaffleDetail } from "@/services/raffles.service";
 import { apiFetch, type ApiResponse } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePurchaseTickets } from "@/hooks/usePurchaseTickets";
+import { toast } from "sonner";
 
 type PaymentStatus = "loading" | "success" | "error" | "pending";
 
 function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const purchaseMutation = usePurchaseTickets();
   
   const statusParam = searchParams?.get("status") as string;
   const txRef = searchParams?.get("tx_ref") as string;
   const raffleId = searchParams?.get("raffle_id") as string;
+  const quantity = parseInt(searchParams?.get("quantity") || "1", 10);
   const message = searchParams?.get("message") as string;
 
   const [status, setStatus] = useState<PaymentStatus>("loading");
@@ -81,6 +87,35 @@ function PaymentStatusContent() {
       }
   }, [raffleId, raffle]);
 
+  const handleRetry = async () => {
+    if (!raffleId || !user) {
+        toast.error("Raffle information or user session missing");
+        return;
+    }
+    
+    try {
+      const data = await purchaseMutation.mutateAsync({
+        raffleId,
+        quantity,
+        participantName: user.fullName,
+        participantEmail: user.email,
+        participantPhone: user.phone,
+        method: "telebirr",
+      });
+      
+      if (data.status === "initiated") {
+        toast.success("New payment initiated! Please check your phone.");
+        // Restart polling with new tx_ref
+        router.replace(`/payment/status?tx_ref=${data.tx_ref}&raffle_id=${raffleId}&quantity=${quantity}`);
+        setStatus("loading");
+        setAttempts(0);
+        setErrorReason(null);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to re-initiate payment");
+    }
+  };
+
   // UI State: Success
   if (status === "success") {
     return (
@@ -144,13 +179,18 @@ function PaymentStatusContent() {
             </p>
 
             <div className="flex flex-col gap-3">
-              <Link 
-                href={raffleId ? `/raffles/${raffleId}` : "/raffles"}
-                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-[0.98]"
+              <button 
+                onClick={handleRetry}
+                disabled={purchaseMutation.isPending}
+                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-[0.98] disabled:opacity-50"
               >
-                <RefreshCcw className="h-5 w-5" />
-                Retry Purchase
-              </Link>
+                {purchaseMutation.isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <RefreshCcw className="h-5 w-5" />
+                )}
+                Retry Push Notification
+              </button>
               <Link 
                 href="/"
                 className="w-full py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"

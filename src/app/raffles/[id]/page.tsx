@@ -75,8 +75,13 @@ export default function RaffleDetailPage() {
         participantName: user?.fullName,
         participantEmail: user?.email,
         participantPhone: user?.phone,
+        method: "telebirr", // Use direct charge for Telebirr
       });
-      if (data.checkout_url) {
+      
+      if (data.status === "initiated") {
+        toast.success("Payment initiated! Please check your phone.");
+        router.push(`/payment/status?tx_ref=${data.tx_ref}&raffle_id=${raffle.id}&quantity=${joinQuantity}`);
+      } else if (data.checkout_url) {
         toast.success("Redirecting to payment...");
         window.location.href = data.checkout_url;
       } else {
@@ -87,7 +92,7 @@ export default function RaffleDetailPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to join raffle");
     }
-  }, [raffle, joinQuantity, user, purchaseMutation, refetch]);
+  }, [raffle, joinQuantity, user, purchaseMutation, refetch, router]);
   
   const handleCopyLink = () => {
     const url = window.location.href;
