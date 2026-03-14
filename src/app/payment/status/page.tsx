@@ -45,25 +45,39 @@ function PaymentStatusContent() {
   const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
   const [errorReason, setErrorReason] = useState<string | null>(message);
   const [attempts, setAttempts] = useState(0);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Debug log for production-ish troubleshooting
   useEffect(() => {
     console.log("[PaymentStatus] Initialized:", { statusParam, txRef, raffleId, fullUrl: window.location.href });
+    
+    // Give the URL parser 5 seconds to "settle" or find the reference 
+    // before we even think about showing a "Missing Reference" error
+    const timer = setTimeout(() => setIsInitializing(false), 5000);
+    return () => clearTimeout(timer);
   }, [statusParam, txRef, raffleId]);
 
   const checkStatus = useCallback(async () => {
     if (!txRef) {
-      // If we are currently loading and there's no txRef, wait a bit
-      // maybe the component just mounted or we are transitioning
+      // Priority 1: If we have an explicit status from the redirect, use it
       if (statusParam === "success") {
         setStatus("success");
-      } else if (statusParam === "error") {
-        setStatus("error");
-      } else {
-        // Only show error if we've truly exhausted options
-        setStatus("error");
-        setErrorReason("Missing transaction reference.");
+        return;
       }
+      if (statusParam === "error") {
+        setStatus("error");
+        return;
+      }
+      
+      // Priority 2: If we are still in the initial 5-second search window, just stay loading
+      if (isInitializing) {
+        setStatus("loading");
+        return;
+      }
+
+      // Priority 3: Only after 5 seconds of finding NOTHING, we show the error
+      setStatus("error");
+      setErrorReason("Missing transaction reference.");
       return;
     }
 
@@ -102,7 +116,7 @@ function PaymentStatusContent() {
         setErrorReason("Could not verify payment status.");
       }
     }
-  }, [txRef, attempts, statusParam]);
+  }, [txRef, attempts, statusParam, isInitializing]);
 
   useEffect(() => {
     if (statusParam === "error") {
