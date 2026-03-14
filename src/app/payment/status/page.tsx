@@ -14,7 +14,7 @@ function PaymentStatusContent() {
   const router = useRouter();
 
   const statusParam = searchParams?.get("status") as string;
-  const txRef = searchParams?.get("tx_ref") as string;
+  const txRef = (searchParams?.get("tx_ref") || searchParams?.get("trx_ref")) as string;
   const raffleId = searchParams?.get("raffle_id") as string;
   const message = searchParams?.get("message") as string;
 
@@ -24,9 +24,17 @@ function PaymentStatusContent() {
   const [attempts, setAttempts] = useState(0);
 
   const checkStatus = useCallback(async () => {
+    // If we have no reference and no explicit success status, it's an error
     if (!txRef) {
-      if (statusParam === "success") setStatus("success");
-      else setStatus("error");
+      if (statusParam === "success") {
+        setStatus("success");
+      } else if (statusParam === "error") {
+        setStatus("error");
+      } else {
+        // Fallback for direct navigation or missing params
+        setStatus("error");
+        setErrorReason("Missing transaction reference.");
+      }
       return;
     }
 
