@@ -13,46 +13,54 @@ function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const statusParam = searchParams?.get("status") as string;
-  const raffleIdParam = searchParams?.get("raffle_id") as string;
-  const message = searchParams?.get("message") as string;
+  // Robust parsing: runs during render, not in useEffect
+  // This prevents race conditions where polling starts before txRef is set
+  const getParam = (name: string) => {
+    // 1. Try standard next/navigation searchParams
+    const fromParams = searchParams?.get(name);
+    if (fromParams) return fromParams;
 
-  // Be extremely robust: Chapa sometimes appends ?trx_ref= to a URL that already has a ?
-  // resulting in ...?raffle_id=123?trx_ref=XYZ. Standard parsers fail here.
-  const [txRef, setTxRef] = useState<string>("");
-  const [raffleId, setRaffleId] = useState<string>(raffleIdParam);
-
-  useEffect(() => {
-    // Manual parsing of the search string for maximum robustness
-    const search = window.location.search;
-    if (search) {
-      // Find anything that looks like tx_ref, trx_ref, or transaction_id
-      const match = search.match(/(?:tx_ref|trx_ref|transaction_id)=([^&?]+)/);
-      if (match && match[1]) {
-        setTxRef(decodeURIComponent(match[1]));
+    // 2. Fallback to manual window.location parsing for mangled URLs (e.g. Double ? from Chapa)
+    if (typeof window !== "undefined") {
+      const search = window.location.search;
+      // Look for the last occurrence of the parameter to handle mangled query strings
+      const regex = new RegExp(`[?&]${name}=([^&?]+)`, "g");
+      let match;
+      let lastValue = "";
+      while ((match = regex.exec(search)) !== null) {
+        lastValue = decodeURIComponent(match[1]);
       }
-
-      // Also try to recover raffle_id if it was mangled
-      const raffleMatch = search.match(/raffle_id=([^&?]+)/);
-      if (raffleMatch && raffleMatch[1]) {
-        setRaffleId(decodeURIComponent(raffleMatch[1]));
-      }
+      return lastValue;
     }
-  }, [searchParams]);
+    return "";
+  };
 
+  const statusParam = getParam("status");
+  const raffleId = getParam("raffle_id");
+  const txRef = getParam("tx_ref") || getParam("trx_ref") || getParam("transaction_id");
+  const message = getParam("message");
+
+  // Internal state
   const [status, setStatus] = useState<PaymentStatus>("loading");
   const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
   const [errorReason, setErrorReason] = useState<string | null>(message);
   const [attempts, setAttempts] = useState(0);
 
+  // Debug log for production-ish troubleshooting
+  useEffect(() => {
+    console.log("[PaymentStatus] Initialized:", { statusParam, txRef, raffleId, fullUrl: window.location.href });
+  }, [statusParam, txRef, raffleId]);
+
   const checkStatus = useCallback(async () => {
     if (!txRef) {
+      // If we are currently loading and there's no txRef, wait a bit
+      // maybe the component just mounted or we are transitioning
       if (statusParam === "success") {
         setStatus("success");
       } else if (statusParam === "error") {
         setStatus("error");
       } else {
-        // Fallback for direct navigation or missing params
+        // Only show error if we've truly exhausted options
         setStatus("error");
         setErrorReason("Missing transaction reference.");
       }
