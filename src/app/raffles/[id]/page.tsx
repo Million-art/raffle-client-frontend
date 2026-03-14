@@ -42,12 +42,12 @@ export default function RaffleDetailPage() {
   // Merge WebSocket updates with fetched raffle
   const raffle = fetchedRaffle
     ? {
-        ...fetchedRaffle,
-        ticketsSold: wsTicketsSold ?? fetchedRaffle.ticketsSold,
-        status: (wsStatus ?? fetchedRaffle.status) ?? undefined,
-        winnerId: wsWinnerId ?? fetchedRaffle.winnerId,
-        winnerName: wsWinnerName ?? fetchedRaffle.winnerName,
-      }
+      ...fetchedRaffle,
+      ticketsSold: wsTicketsSold ?? fetchedRaffle.ticketsSold,
+      status: (wsStatus ?? fetchedRaffle.status) ?? undefined,
+      winnerId: wsWinnerId ?? fetchedRaffle.winnerId,
+      winnerName: wsWinnerName ?? fetchedRaffle.winnerName,
+    }
     : null;
 
   // Legacy status handling removed in favor of dedicated /payment/status page
@@ -75,13 +75,8 @@ export default function RaffleDetailPage() {
         participantName: user?.fullName,
         participantEmail: user?.email,
         participantPhone: user?.phone,
-        method: "telebirr", // Use direct charge for Telebirr
       });
-      
-      if (data.status === "initiated") {
-        toast.success("Payment initiated! Please check your phone.");
-        router.push(`/payment/status?tx_ref=${data.tx_ref}&raffle_id=${raffle.id}&quantity=${joinQuantity}`);
-      } else if (data.checkout_url) {
+      if (data.checkout_url) {
         toast.success("Redirecting to payment...");
         window.location.href = data.checkout_url;
       } else {
@@ -92,8 +87,8 @@ export default function RaffleDetailPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to join raffle");
     }
-  }, [raffle, joinQuantity, user, purchaseMutation, refetch, router]);
-  
+  }, [raffle, joinQuantity, user, purchaseMutation, refetch]);
+
   const handleCopyLink = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
@@ -292,7 +287,7 @@ export default function RaffleDetailPage() {
                     <Copy className="h-4 w-4" />
                     Copy Link
                   </button>
-                  
+
                   <div className="flex items-center gap-2 ml-2">
                     <a
                       href={`https://t.me/share/url?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(`Check out this raffle: ${raffle.name}`)}`}
@@ -303,7 +298,7 @@ export default function RaffleDetailPage() {
                     >
                       <Send className="h-5 w-5" />
                     </a>
-                    
+
                     <a
                       href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this raffle: ${raffle.name} - ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
                       target="_blank"
@@ -313,7 +308,7 @@ export default function RaffleDetailPage() {
                     >
                       <MessageCircle className="h-5 w-5" />
                     </a>
-                    
+
                     <a
                       href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
                       target="_blank"

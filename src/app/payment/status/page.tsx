@@ -1,27 +1,21 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, Home, Ticket, AlertCircle, RefreshCcw } from "lucide-react";
 import { getRaffleById, type RaffleDetail } from "@/services/raffles.service";
 import { apiFetch, type ApiResponse } from "@/lib/api";
-import { useAuth } from "@/contexts/AuthContext";
-import { usePurchaseTickets } from "@/hooks/usePurchaseTickets";
-import { toast } from "sonner";
 
 type PaymentStatus = "loading" | "success" | "error" | "pending";
 
-function PaymentStatusContent() {
+export default function PaymentStatusPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
-  const purchaseMutation = usePurchaseTickets();
-  
+
   const statusParam = searchParams?.get("status") as string;
   const txRef = searchParams?.get("tx_ref") as string;
   const raffleId = searchParams?.get("raffle_id") as string;
-  const quantity = parseInt(searchParams?.get("quantity") || "1", 10);
   const message = searchParams?.get("message") as string;
 
   const [status, setStatus] = useState<PaymentStatus>("loading");
@@ -40,7 +34,7 @@ function PaymentStatusContent() {
       const response = await apiFetch<ApiResponse<{ status: string; raffle_id?: string }>>(
         `/api/payments/status/${txRef}`
       );
-      
+
       if (response.data.status === "success") {
         setStatus("success");
         if (response.data.raffle_id) {
@@ -65,10 +59,10 @@ function PaymentStatusContent() {
     } catch (err) {
       console.error("Status check failed:", err);
       if (attempts < 5) {
-          setTimeout(() => setAttempts(prev => prev + 1), 2000);
+        setTimeout(() => setAttempts(prev => prev + 1), 2000);
       } else {
-          setStatus("error");
-          setErrorReason("Could not verify payment status.");
+        setStatus("error");
+        setErrorReason("Could not verify payment status.");
       }
     }
   }, [txRef, attempts, statusParam]);
@@ -82,39 +76,10 @@ function PaymentStatusContent() {
   }, [statusParam, checkStatus]);
 
   useEffect(() => {
-      if (raffleId && !raffle) {
-          getRaffleById(raffleId).then(setRaffle).catch(console.error);
-      }
+    if (raffleId && !raffle) {
+      getRaffleById(raffleId).then(setRaffle).catch(console.error);
+    }
   }, [raffleId, raffle]);
-
-  const handleRetry = async () => {
-    if (!raffleId || !user) {
-        toast.error("Raffle information or user session missing");
-        return;
-    }
-    
-    try {
-      const data = await purchaseMutation.mutateAsync({
-        raffleId,
-        quantity,
-        participantName: user.fullName,
-        participantEmail: user.email,
-        participantPhone: user.phone,
-        method: "telebirr",
-      });
-      
-      if (data.status === "initiated") {
-        toast.success("New payment initiated! Please check your phone.");
-        // Restart polling with new tx_ref
-        router.replace(`/payment/status?tx_ref=${data.tx_ref}&raffle_id=${raffleId}&quantity=${quantity}`);
-        setStatus("loading");
-        setAttempts(0);
-        setErrorReason(null);
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to re-initiate payment");
-    }
-  };
 
   // UI State: Success
   if (status === "success") {
@@ -129,7 +94,7 @@ function PaymentStatusContent() {
             <p className="text-slate-600 mb-8">
               Your tickets have been issued. You are now officially in the {raffle?.name ? `"${raffle.name}"` : "raffle"}!
             </p>
-            
+
             {raffle && (
               <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-left">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Raffle</p>
@@ -144,14 +109,14 @@ function PaymentStatusContent() {
             )}
 
             <div className="flex flex-col gap-3">
-              <Link 
+              <Link
                 href={raffleId ? `/raffles/${raffleId}` : "/raffles"}
                 className="w-full py-4 bg-brand-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]"
               >
                 <Ticket className="h-5 w-5" />
                 Go to {raffleId ? "Raffle" : "Raffles"}
               </Link>
-              <Link 
+              <Link
                 href="/my-raffles"
                 className="w-full py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
               >
@@ -179,19 +144,14 @@ function PaymentStatusContent() {
             </p>
 
             <div className="flex flex-col gap-3">
-              <button 
-                onClick={handleRetry}
-                disabled={purchaseMutation.isPending}
-                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-[0.98] disabled:opacity-50"
+              <Link
+                href={raffleId ? `/raffles/${raffleId}` : "/raffles"}
+                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-[0.98]"
               >
-                {purchaseMutation.isPending ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <RefreshCcw className="h-5 w-5" />
-                )}
-                Retry Push Notification
-              </button>
-              <Link 
+                <RefreshCcw className="h-5 w-5" />
+                Retry Purchase
+              </Link>
+              <Link
                 href="/"
                 className="w-full py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
               >
@@ -223,6 +183,28 @@ function PaymentStatusContent() {
       </div>
     </main>
   );
+}
+  }
+
+// UI State: Loading / Pending
+return (
+  <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-12 text-center overflow-hidden">
+      <div className="relative mb-8 inline-block">
+        <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-2xl animate-pulse" />
+        <Loader2 className="h-20 w-20 text-brand-blue animate-spin relative" />
+      </div>
+      <h1 className="text-2xl font-black text-slate-900 mb-2">Verifying Payment</h1>
+      <p className="text-slate-500 animate-pulse">
+        {status === "pending" ? "Waiting for confirmation from bank..." : "Synchronizing with payment gateway..."}
+      </p>
+      <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-sm">
+        <AlertCircle className="h-4 w-4" />
+        <span>Please do not close this window</span>
+      </div>
+    </div>
+  </main>
+);
 }
 
 export default function PaymentStatusPage() {

@@ -10,7 +10,6 @@ interface PurchaseParams {
   participantName?: string;
   participantEmail?: string;
   participantPhone?: string;
-  method?: string;
 }
 
 interface PurchaseResult {
@@ -18,8 +17,6 @@ interface PurchaseResult {
   raffle_id: string;
   participant_id: string;
   quantity: number;
-  status?: string;
-  tx_ref?: string;
 }
 
 export function usePurchaseTickets() {
@@ -33,8 +30,7 @@ export function usePurchaseTickets() {
         undefined,
         params.participantName,
         params.participantEmail,
-        params.participantPhone,
-        params.method
+        params.participantPhone
       );
     },
     onSuccess: (_, variables) => {
