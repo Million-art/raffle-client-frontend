@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, Home, Ticket, AlertCircle, RefreshCcw } from "lucide-react";
@@ -9,7 +9,7 @@ import { apiFetch, type ApiResponse } from "@/lib/api";
 
 type PaymentStatus = "loading" | "success" | "error" | "pending";
 
-export default function PaymentStatusPage() {
+function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -182,5 +182,23 @@ export default function PaymentStatusPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function PaymentStatusPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-12 text-center overflow-hidden">
+          <div className="relative mb-8 inline-block">
+            <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-2xl animate-pulse" />
+            <Loader2 className="h-20 w-20 text-brand-blue animate-spin relative" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 mb-2">Loading...</h1>
+        </div>
+      </main>
+    }>
+      <PaymentStatusContent />
+    </Suspense>
   );
 }
