@@ -50,20 +50,7 @@ export default function RaffleDetailPage() {
       }
     : null;
 
-  useEffect(() => {
-    const status = searchParams?.get("status");
-    if (status === "success") {
-      toast.success("Payment successful! Your tickets have been issued.");
-      refetch();
-      // Clean up URL
-      const newPath = window.location.pathname;
-      window.history.replaceState({}, '', newPath);
-    } else if (status === "error") {
-      toast.error("Payment was not successful. Please try again.");
-      const newPath = window.location.pathname;
-      window.history.replaceState({}, '', newPath);
-    }
-  }, [searchParams, refetch]);
+  // Legacy status handling removed in favor of dedicated /payment/status page
 
   const [joinQuantity, setJoinQuantity] = useState(1);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
