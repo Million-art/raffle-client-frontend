@@ -14,9 +14,31 @@ function PaymentStatusContent() {
   const router = useRouter();
 
   const statusParam = searchParams?.get("status") as string;
-  const txRef = (searchParams?.get("tx_ref") || searchParams?.get("trx_ref")) as string;
-  const raffleId = searchParams?.get("raffle_id") as string;
+  const raffleIdParam = searchParams?.get("raffle_id") as string;
   const message = searchParams?.get("message") as string;
+
+  // Be extremely robust: Chapa sometimes appends ?trx_ref= to a URL that already has a ?
+  // resulting in ...?raffle_id=123?trx_ref=XYZ. Standard parsers fail here.
+  const [txRef, setTxRef] = useState<string>("");
+  const [raffleId, setRaffleId] = useState<string>(raffleIdParam);
+
+  useEffect(() => {
+    // Manual parsing of the search string for maximum robustness
+    const search = window.location.search;
+    if (search) {
+      // Find anything that looks like tx_ref, trx_ref, or transaction_id
+      const match = search.match(/(?:tx_ref|trx_ref|transaction_id)=([^&?]+)/);
+      if (match && match[1]) {
+        setTxRef(decodeURIComponent(match[1]));
+      }
+
+      // Also try to recover raffle_id if it was mangled
+      const raffleMatch = search.match(/raffle_id=([^&?]+)/);
+      if (raffleMatch && raffleMatch[1]) {
+        setRaffleId(decodeURIComponent(raffleMatch[1]));
+      }
+    }
+  }, [searchParams]);
 
   const [status, setStatus] = useState<PaymentStatus>("loading");
   const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
@@ -24,7 +46,6 @@ function PaymentStatusContent() {
   const [attempts, setAttempts] = useState(0);
 
   const checkStatus = useCallback(async () => {
-    // If we have no reference and no explicit success status, it's an error
     if (!txRef) {
       if (statusParam === "success") {
         setStatus("success");
