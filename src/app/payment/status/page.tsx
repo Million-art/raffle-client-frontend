@@ -37,7 +37,8 @@ function PaymentStatusContent() {
 
   const statusParam = getParam("status");
   const raffleId = getParam("raffle_id");
-  const txRef = getParam("tx_ref");
+  // Chapa may use tx_ref or trx_ref in redirect URLs (callback uses trx_ref)
+  const txRef = getParam("tx_ref") || getParam("trx_ref");
   const message = getParam("message");
 
   // Internal state
