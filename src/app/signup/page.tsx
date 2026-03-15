@@ -197,9 +197,9 @@ function SignupForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                    placeholder="At least 6 characters"
+                    placeholder="Min 8 chars, uppercase, lowercase, number"
                     required
-                    minLength={6}
+                    minLength={8}
                   />
                   <button
                     type="button"
