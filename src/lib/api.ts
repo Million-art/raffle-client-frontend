@@ -74,10 +74,6 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  if (error instanceof Error) return error.message;
-  return "An unexpected error occurred";
-}
+export { getErrorMessage } from "@raffle-hub/shared";
 
 
