@@ -2,7 +2,7 @@ name: Deploy Client UI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ feature/chapa ]
     paths:
       - 'src/**'
       - 'public/**'
