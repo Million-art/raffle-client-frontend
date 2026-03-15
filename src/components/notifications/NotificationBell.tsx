@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useClickOutside, useUserNotificationListener } from "@raffle-hub/shared";
 import { Bell, Check, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getNotifications, markAsRead, markAllAsRead, getUnreadCount, type Notification } from '@/services/notifications.service';
@@ -22,58 +23,33 @@ export const NotificationBell: React.FC = () => {
         }
     }, [isOpen]);
 
-    // Load unread count on mount and listen to web sockets
+    const handleNotification = useCallback((msg: { type: string; data?: unknown }) => {
+        if (msg.type === 'notification' && msg.data) {
+            const newNotif = msg.data as Notification;
+            setNotifications(prev => {
+                if (prev.some(n => n.id === newNotif.id)) return prev;
+                return [newNotif, ...prev];
+            });
+            setUnreadCount(prev => prev + 1);
+            toast.info(newNotif.title, {
+                description: newNotif.message,
+                action: newNotif.actionUrl ? {
+                    label: newNotif.actionLabel || 'View',
+                    onClick: () => window.location.href = newNotif.actionUrl!
+                } : undefined
+            });
+        }
+    }, []);
+
+    useUserNotificationListener(wsClient, handleNotification);
+
     useEffect(() => {
         loadUnreadCount();
         const interval = setInterval(loadUnreadCount, 30000);
-
-        let unsubscribe: (() => void) | undefined;
-
-        if (wsClient) {
-            unsubscribe = wsClient.on('user_notification', (msg: any) => {
-                if (msg.type === 'notification' && msg.data) {
-                    const newNotif = msg.data as Notification;
-                    setNotifications(prev => {
-                        // Prevent duplicates
-                        if (prev.some(n => n.id === newNotif.id)) return prev;
-                        return [newNotif, ...prev];
-                    });
-                    setUnreadCount(prev => prev + 1);
-
-                    // Trigger real-time toast
-                    toast.info(newNotif.title, {
-                        description: newNotif.message,
-                        action: newNotif.actionUrl ? {
-                            label: newNotif.actionLabel || 'View',
-                            onClick: () => window.location.href = newNotif.actionUrl!
-                        } : undefined
-                    });
-                }
-            });
-        }
-
-        return () => {
-            clearInterval(interval);
-            if (unsubscribe) unsubscribe();
-        };
+        return () => clearInterval(interval);
     }, []);
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isOpen]);
+    useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
     const loadNotifications = async () => {
         setLoading(true);
